@@ -6,7 +6,10 @@ import { cn } from "@/lib/utils"
 import "./globals.css"
 import { Inter } from "next/font/google"
 
-const inter = Inter({ subsets: ["latin"] })
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+})
 
 export const metadata = {
   title: "ResumeAI - AI-Powered Resume Builder",
@@ -24,6 +27,7 @@ export default function RootLayout({
       <body className={cn("min-h-screen bg-background antialiased", inter.className)}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <div className="relative flex min-h-screen flex-col">
+            <SiteHeader />
             <main className="flex-1">{children}</main>
             <Toaster />
           </div>

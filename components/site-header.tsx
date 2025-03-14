@@ -20,17 +20,11 @@ export function SiteHeader() {
 
         <div className="hidden md:flex md:flex-1 md:items-center md:justify-between">
           <nav className="flex items-center space-x-6 text-sm font-medium">
-            <Link href="/templates" className="transition-colors hover:text-foreground/80">
-              Templates
-            </Link>
             <Link href="/features" className="transition-colors hover:text-foreground/80">
               Features
             </Link>
             <Link href="/pricing" className="transition-colors hover:text-foreground/80">
               Pricing
-            </Link>
-            <Link href="/blog" className="transition-colors hover:text-foreground/80">
-              Blog
             </Link>
           </nav>
           <div className="flex items-center space-x-3">
@@ -61,17 +55,11 @@ export function SiteHeader() {
               <span className="sr-only">Close menu</span>
             </Button>
             <nav className="flex flex-col space-y-6 text-lg font-medium">
-              <Link href="/templates" className="hover:text-foreground/80" onClick={() => setIsMenuOpen(false)}>
-                Templates
-              </Link>
               <Link href="/features" className="hover:text-foreground/80" onClick={() => setIsMenuOpen(false)}>
                 Features
               </Link>
               <Link href="/pricing" className="hover:text-foreground/80" onClick={() => setIsMenuOpen(false)}>
                 Pricing
-              </Link>
-              <Link href="/blog" className="hover:text-foreground/80" onClick={() => setIsMenuOpen(false)}>
-                Blog
               </Link>
             </nav>
             <div className="mt-auto flex flex-col space-y-4 pt-6">

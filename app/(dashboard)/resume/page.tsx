@@ -146,134 +146,136 @@ export default function ResumesPage() {
                 </svg>
               </TabsTrigger>
             </TabsList>
-            <TabsContent value="grid" className="mt-0">
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {resumes.map((resume) => (
-                  <Card key={resume.id} className="shadow-sm">
-                    <CardHeader className="pb-2">
-                      <div className="flex justify-between items-start">
-                        <CardTitle className="text-lg">{resume.title}</CardTitle>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem>
-                              <Eye className="mr-2 h-4 w-4" /> View
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              <Pencil className="mr-2 h-4 w-4" /> Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              <Download className="mr-2 h-4 w-4" /> Download
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="text-destructive">
-                              <Trash2 className="mr-2 h-4 w-4" /> Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                      <CardDescription>Last updated: {resume.updated}</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span>Resume Score</span>
-                          <span className="font-medium">{resume.score}/100</span>
-                        </div>
-                        <Progress value={resume.score} className="h-2 bg-blue-100 dark:bg-blue-950">
-                          <div className="h-full bg-blue-600 dark:bg-blue-500 rounded-full" />
-                        </Progress>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Template: {resume.template}</span>
-                        <span className="text-muted-foreground">{resume.category}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <Button variant="outline" size="sm">
-                          Edit
-                        </Button>
-                        <Button size="sm" className="blue-gradient">
-                          View
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </TabsContent>
-
-            <TabsContent value="list" className="mt-0">
-              <Card className="shadow-sm">
-                <CardContent className="p-0">
-                  <div className="divide-y">
-                    {resumes.map((resume) => (
-                      <div key={resume.id} className="flex items-center justify-between p-4">
-                        <div className="flex items-center gap-4">
-                          <div className="h-10 w-10 rounded-md bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
-                            <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                          </div>
-                          <div>
-                            <h3 className="font-medium">{resume.title}</h3>
-                            <p className="text-sm text-muted-foreground">
-                              Updated {resume.updated} • {resume.category}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <div className="hidden md:flex items-center gap-2 mr-4">
-                            <div className="text-sm font-medium">{resume.score}/100</div>
-                            <div className="w-24 h-2 bg-blue-100 dark:bg-blue-950 rounded-full overflow-hidden">
-                              <div
-                                className="h-full bg-blue-600 dark:bg-blue-500 rounded-full"
-                                style={{ width: `${resume.score}%` }}
-                              />
-                            </div>
-                          </div>
-                          <Button variant="ghost" size="sm">
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="sm">
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="sm">
-                            <Download className="h-4 w-4" />
-                          </Button>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem>
-                                <Eye className="mr-2 h-4 w-4" /> View
-                              </DropdownMenuItem>
-                              <DropdownMenuItem>
-                                <Pencil className="mr-2 h-4 w-4" /> Edit
-                              </DropdownMenuItem>
-                              <DropdownMenuItem>
-                                <Download className="mr-2 h-4 w-4" /> Download
-                              </DropdownMenuItem>
-                              <DropdownMenuItem className="text-destructive">
-                                <Trash2 className="mr-2 h-4 w-4" /> Delete
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
           </Tabs>
         </div>
       </div>
 
+      {/* Wrap the TabsContent components in a Tabs component */}
+      <Tabs defaultValue="grid">
+        <TabsContent value="grid" className="mt-0">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {resumes.map((resume) => (
+              <Card key={resume.id} className="shadow-sm">
+                <CardHeader className="pb-2">
+                  <div className="flex justify-between items-start">
+                    <CardTitle className="text-lg">{resume.title}</CardTitle>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem>
+                          <Eye className="mr-2 h-4 w-4" /> View
+                        </DropdownMenuItem>
+                        <DropdownMenuItem>
+                          <Pencil className="mr-2 h-4 w-4" /> Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem>
+                          <Download className="mr-2 h-4 w-4" /> Download
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="text-destructive">
+                          <Trash2 className="mr-2 h-4 w-4" /> Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                  <CardDescription>Last updated: {resume.updated}</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Resume Score</span>
+                      <span className="font-medium">{resume.score}/100</span>
+                    </div>
+                    <Progress value={resume.score} className="h-2 bg-blue-100 dark:bg-blue-950">
+                      <div className="h-full bg-blue-600 dark:bg-blue-500 rounded-full" />
+                    </Progress>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Template: {resume.template}</span>
+                    <span className="text-muted-foreground">{resume.category}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <Button variant="outline" size="sm">
+                      Edit
+                    </Button>
+                    <Button size="sm" className="blue-gradient">
+                      View
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </TabsContent>
 
+        <TabsContent value="list" className="mt-0">
+          <Card className="shadow-sm">
+            <CardContent className="p-0">
+              <div className="divide-y">
+                {resumes.map((resume) => (
+                  <div key={resume.id} className="flex items-center justify-between p-4">
+                    <div className="flex items-center gap-4">
+                      <div className="h-10 w-10 rounded-md bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
+                        <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                      </div>
+                      <div>
+                        <h3 className="font-medium">{resume.title}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Updated {resume.updated} • {resume.category}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="hidden md:flex items-center gap-2 mr-4">
+                        <div className="text-sm font-medium">{resume.score}/100</div>
+                        <div className="w-24 h-2 bg-blue-100 dark:bg-blue-950 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-blue-600 dark:bg-blue-500 rounded-full"
+                            style={{ width: `${resume.score}%` }}
+                          />
+                        </div>
+                      </div>
+                      <Button variant="ghost" size="sm">
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="sm">
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="sm">
+                        <Download className="h-4 w-4" />
+                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem>
+                            <Eye className="mr-2 h-4 w-4" /> View
+                          </DropdownMenuItem>
+                          <DropdownMenuItem>
+                            <Pencil className="mr-2 h-4 w-4" /> Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem>
+                            <Download className="mr-2 h-4 w-4" /> Download
+                          </DropdownMenuItem>
+                          <DropdownMenuItem className="text-destructive">
+                            <Trash2 className="mr-2 h-4 w-4" /> Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }

@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { ArrowRight } from "lucide-react"
+import { ArrowRight, FileText, BarChart, Target } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 export function HeroSection() {
@@ -10,22 +10,42 @@ export function HeroSection() {
           <div className="flex flex-col justify-center space-y-4">
             <div className="space-y-2">
               <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
-                Build Your Perfect Resume with AI
+                Build Your Perfect Resume with AI-Powered Analysis
               </h1>
               <p className="max-w-[600px] text-muted-foreground md:text-xl">
-                Create professional resumes that get noticed. Our AI-powered platform helps you craft, analyze, and
-                optimize your resume for your dream job.
+                Create professional resumes that get noticed. Our AI-powered platform analyzes, scores, and optimizes
+                your resume for your dream job.
               </p>
             </div>
             <div className="flex flex-col gap-2 min-[400px]:flex-row">
               <Button asChild size="sm" className="blue-gradient">
-                <Link href="/signup">
-                  Get Started <ArrowRight className="ml-2 h-4 w-4" />
+                <Link href="/resume/builder">
+                  Create Resume <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
-              <Button variant="outline" size="sm">
-                View Templates
+              <Button asChild variant="outline" size="sm">
+                <Link href="/resume/analyze">Analyze Existing Resume</Link>
               </Button>
+            </div>
+            <div className="flex flex-wrap gap-4 mt-4">
+              <div className="flex items-center">
+                <div className="mr-2 rounded-full bg-primary/10 p-1">
+                  <FileText className="h-4 w-4 text-primary" />
+                </div>
+                <span className="text-sm">AI-Powered Analysis</span>
+              </div>
+              <div className="flex items-center">
+                <div className="mr-2 rounded-full bg-primary/10 p-1">
+                  <BarChart className="h-4 w-4 text-primary" />
+                </div>
+                <span className="text-sm">Resume Scoring</span>
+              </div>
+              <div className="flex items-center">
+                <div className="mr-2 rounded-full bg-primary/10 p-1">
+                  <Target className="h-4 w-4 text-primary" />
+                </div>
+                <span className="text-sm">ATS Optimization</span>
+              </div>
             </div>
           </div>
           <div className="flex items-center justify-center">

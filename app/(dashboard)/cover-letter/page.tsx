@@ -283,7 +283,8 @@ export default function CoverLetterPage() {
   )
 }
 
-function Label({ htmlFor, children }) {
+// @ts-ignore
+function Label({ htmlFor, children }) {                    
   return (
     <label
       htmlFor={htmlFor}
@@ -294,6 +295,7 @@ function Label({ htmlFor, children }) {
   )
 }
 
+// @ts-ignore
 function Textarea({ id, placeholder, className, ...props }) {
   return (
     <textarea
