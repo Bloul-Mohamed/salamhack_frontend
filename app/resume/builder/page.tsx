@@ -26,7 +26,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { generateLatexCV, convertLatexToPdf, convertLatexToWord, analyzeCV } from "@/lib/api-service"
+import { generateLatexCV, convertLatexToPdf, convertLatexToWord, analyzeCV, scoreCV } from "@/lib/api-service"
 import { toast } from "@/hooks/use-toast"
 
 export default function ResumeBuilderPage() {
@@ -34,6 +34,8 @@ export default function ResumeBuilderPage() {
   const [activeTab, setActiveTab] = useState("personal")
   const [isGenerating, setIsGenerating] = useState(false)
   const [latexCode, setLatexCode] = useState("")
+  const [isAnalyzing, setIsAnalyzing] = useState(false)
+  const [analysisResults, setAnalysisResults] = useState(null)
 
   // Form state
   const [personalInfo, setPersonalInfo] = useState({
@@ -200,127 +202,29 @@ export default function ResumeBuilderPage() {
   const generateResume = async () => {
     try {
       setIsGenerating(true)
-
-      // Format the data for the API
       const cvData = {
-        personal_info: {
-          name: personalInfo.name,
-          title: personalInfo.title,
-          email: personalInfo.email,
-          phone: personalInfo.phone,
-          location: personalInfo.location,
-        },
-        summary: personalInfo.summary,
-        experience: experiences.map((exp) => ({
-          title: exp.title,
-          company: exp.company,
-          location: exp.location,
-          start_date: exp.startDate,
-          end_date: exp.endDate,
-          description: exp.description,
-        })),
-        education: education.map((edu) => ({
-          degree: edu.degree,
-          school: edu.school,
-          location: edu.location,
-          start_date: edu.startDate,
-          end_date: edu.endDate,
-          description: edu.description,
-        })),
-        skills: {
-          technical: skills.technical.filter(Boolean).join(", "),
-          soft: skills.soft.filter(Boolean).join(", "),
-          languages: skills.languages.filter(Boolean).join(", "),
-          tools: skills.tools.filter(Boolean).join(", "),
-        },
+        personal_info: personalInfo,
+        experience: experiences,
+        education: education,
+        skills: skills,
+        sections: sectionOrder
       }
-
-      try {
-        // Try to call the API
-        const response = await generateLatexCV(cvData)
-        setLatexCode(response.latex_code)
-      } catch (apiError) {
-        console.error("API call failed:", apiError)
-
-        // Generate a mock LaTeX code as fallback
-        const mockLatexCode = `
-\\documentclass{article}
-\\usepackage{geometry}
-\\usepackage{titlesec}
-\\usepackage{enumitem}
-\\usepackage{hyperref}
-
-\\geometry{a4paper, margin=1in}
-\\titleformat{\\section}{\\Large\\bfseries}{}{0em}{}[\\titlerule]
-\\titlespacing{\\section}{0pt}{12pt}{8pt}
-
-\\begin{document}
-
-\\begin{center}
-  {\\LARGE\\bfseries ${personalInfo.name || "Your Name"}}\\\\
-  ${personalInfo.title || "Professional Title"}\\\\
-  ${personalInfo.email || "email@example.com"} | ${personalInfo.phone || "Phone"} | ${personalInfo.location || "Location"}
-\\end{center}
-
-\\section{Summary}
-${personalInfo.summary || "Professional summary goes here."}
-
-\\section{Experience}
-${experiences
-            .map(
-              (exp) => `
-\\textbf{${exp.title || "Job Title"}} | ${exp.company || "Company Name"} | ${exp.location || "Location"}\\\\
-${exp.startDate || "Start Date"} - ${exp.endDate || "End Date"}\\\\
-${exp.description || "Job description goes here."}
-`,
-            )
-            .join("\n\n")}
-
-\\section{Education}
-${education
-            .map(
-              (edu) => `
-\\textbf{${edu.degree || "Degree"}} | ${edu.school || "School Name"} | ${edu.location || "Location"}\\\\
-${edu.startDate || "Start Date"} - ${edu.endDate || "End Date"}\\\\
-${edu.description || ""}
-`,
-            )
-            .join("\n\n")}
-
-\\section{Skills}
-\\textbf{Technical Skills:} ${skills.technical.filter(Boolean).join(", ") || "List your technical skills"}\\\\
-\\textbf{Soft Skills:} ${skills.soft.filter(Boolean).join(", ") || "List your soft skills"}\\\\
-\\textbf{Languages:} ${skills.languages.filter(Boolean).join(", ") || "List languages you speak"}\\\\
-\\textbf{Tools:} ${skills.tools.filter(Boolean).join(", ") || "List tools you're proficient with"}
-
-\\end{document}
-      `
-
-        setLatexCode(mockLatexCode)
-
-        // Inform the user we're using a fallback
-        toast({
-          title: "API Connection Issue",
-          description: "Using offline mode. Your resume has been generated locally.",
-        })
-      }
-
-      toast({
-        title: "Resume Generated",
-        description: "Your resume has been successfully generated.",
-      })
-
-      // Store the LaTeX code in localStorage as a backup
+      
+      // @ts-ignore
+      const response = await generateLatexCV(cvData)
+      const latexCode = response.latex_content
+      
+      // Store in localStorage for preview page
       localStorage.setItem("latexCode", latexCode)
-
+      
       // Navigate to preview
       router.push("/resume/preview")
     } catch (error) {
       console.error("Error generating resume:", error)
       toast({
         title: "Error",
-        description: "Failed to generate resume. Please try again or check your network connection.",
-        variant: "destructive",
+        description: "Failed to generate resume. Please try again.",
+        variant: "destructive"
       })
     } finally {
       setIsGenerating(false)
@@ -423,57 +327,31 @@ ${edu.description || ""}
   }
 
   const analyzeResume = async () => {
-    // Construct a text representation of the resume
-    const resumeText = `
-      ${personalInfo.name}
-      ${personalInfo.title}
-      ${personalInfo.email} | ${personalInfo.phone} | ${personalInfo.location}
-      
-      SUMMARY
-      ${personalInfo.summary}
-      
-      EXPERIENCE
-      ${experiences
-        .map(
-          (exp) => `
-        ${exp.title} at ${exp.company}, ${exp.location}
-        ${exp.startDate} - ${exp.endDate}
-        ${exp.description}
-      `,
-        )
-        .join("\n")}
-      
-      EDUCATION
-      ${education
-        .map(
-          (edu) => `
-        ${edu.degree} from ${edu.school}, ${edu.location}
-        ${edu.startDate} - ${edu.endDate}
-        ${edu.description}
-      `,
-        )
-        .join("\n")}
-      
-      SKILLS
-      Technical: ${skills.technical.filter(Boolean).join(", ")}
-      Soft Skills: ${skills.soft.filter(Boolean).join(", ")}
-      Languages: ${skills.languages.filter(Boolean).join(", ")}
-      Tools: ${skills.tools.filter(Boolean).join(", ")}
-    `
-
     try {
-      const analysis = await analyzeCV(resumeText)
-
-      // Navigate to analysis page with the results
-      // @ts-ignore
-      router.push({ pathname: "/resume/analysis", query: { data: JSON.stringify(analysis) }, })
+      setIsAnalyzing(true)
+      const cvText = JSON.stringify({
+        personal_info: personalInfo,
+        experience: experiences,
+        education: education,
+        skills: skills
+      })
+      
+      const response = await scoreCV(cvText)
+      setAnalysisResults(response)
+      
+      toast({
+        title: "Analysis Complete",
+        description: `Overall Score: ${response.score.overall}/100`
+      })
     } catch (error) {
       console.error("Error analyzing resume:", error)
       toast({
         title: "Error",
         description: "Failed to analyze resume. Please try again.",
-        variant: "destructive",
+        variant: "destructive"
       })
+    } finally {
+      setIsAnalyzing(false)
     }
   }
 

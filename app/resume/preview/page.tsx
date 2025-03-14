@@ -34,8 +34,6 @@ export default function PreviewPage() {
       setIsLoading(true)
       // @ts-ignore
       const response = await convertLatexToPdf({ latex_content: latexCode })
-
-      // Create a blob from the response and trigger download
       const blob = await response.blob()
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement("a")
@@ -75,8 +73,6 @@ export default function PreviewPage() {
       setIsLoading(true)
       // @ts-ignore
       const response = await convertLatexToWord({ latex_content: latexCode })
-
-      // Create a blob from the response and trigger download
       const blob = await response.blob()
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement("a")
