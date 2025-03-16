@@ -622,7 +622,7 @@ export default function AnalyzePage() {
                         <CardContent>
                           {analysisResults?.analysis?.strengths && analysisResults.analysis.strengths.length > 0 ? (
                             <ul className="space-y-4">
-                              {analysisResults.analysis.strengths.map((strength, index) => (
+                              {analysisResults.analysis.strengths?.map((strength, index) => (
                                 <li
                                   key={index}
                                   className="flex items-start gap-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg"
@@ -653,7 +653,7 @@ export default function AnalyzePage() {
                         <CardContent>
                           {analysisResults?.analysis?.weaknesses && analysisResults.analysis.weaknesses.length > 0 ? (
                             <ul className="space-y-4">
-                              {analysisResults.analysis.weaknesses.map((weakness, index) => (
+                              {analysisResults.analysis.weaknesses?.map((weakness, index) => (
                                 <li
                                   key={index}
                                   className="flex items-start gap-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg"
@@ -811,7 +811,7 @@ export default function AnalyzePage() {
                         <CardContent>
                           {analysisResults?.analysis?.action_plan && analysisResults.analysis.action_plan.length > 0 ? (
                             <div className="space-y-4">
-                              {analysisResults.analysis.action_plan.map((action, index) => (
+                              {analysisResults.analysis.action_plan?.map((action, index) => (
                                 <div key={index} className="flex items-start gap-3 p-4 border rounded-lg">
                                   <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border bg-muted text-sm font-medium">
                                     {index + 1}
@@ -824,7 +824,7 @@ export default function AnalyzePage() {
                             </div>
                           ) : analysisResults?.score?.suggestions && analysisResults.score.suggestions.length > 0 ? (
                             <div className="space-y-4">
-                              {analysisResults.score.suggestions.map((suggestion, index) => (
+                              {analysisResults.score.suggestions?.map((suggestion, index) => (
                                 <div key={index} className="flex items-start gap-3 p-4 border rounded-lg">
                                   <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border bg-muted text-sm font-medium">
                                     {index + 1}
@@ -1077,7 +1077,7 @@ export default function AnalyzePage() {
                         <CardContent>
                           {analysisResults?.analysis?.strengths && analysisResults.analysis.strengths.length > 0 ? (
                             <ul className="space-y-4">
-                              {analysisResults.analysis.strengths.map((strength, index) => (
+                              {analysisResults.analysis.strengths?.map((strength, index) => (
                                 <li
                                   key={index}
                                   className="flex items-start gap-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg"
@@ -1108,7 +1108,7 @@ export default function AnalyzePage() {
                         <CardContent>
                           {analysisResults?.analysis?.weaknesses && analysisResults.analysis.weaknesses.length > 0 ? (
                             <ul className="space-y-4">
-                              {analysisResults.analysis.weaknesses.map((weakness, index) => (
+                              {analysisResults.analysis.weaknesses?.map((weakness, index) => (
                                 <li
                                   key={index}
                                   className="flex items-start gap-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg"
@@ -1266,7 +1266,7 @@ export default function AnalyzePage() {
                         <CardContent>
                           {analysisResults?.analysis?.action_plan && analysisResults.analysis.action_plan.length > 0 ? (
                             <div className="space-y-4">
-                              {analysisResults.analysis.action_plan.map((action, index) => (
+                              {analysisResults.analysis.action_plan?.map((action, index) => (
                                 <div key={index} className="flex items-start gap-3 p-4 border rounded-lg">
                                   <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border bg-muted text-sm font-medium">
                                     {index + 1}
@@ -1279,7 +1279,7 @@ export default function AnalyzePage() {
                             </div>
                           ) : analysisResults?.score?.suggestions && analysisResults.score.suggestions.length > 0 ? (
                             <div className="space-y-4">
-                              {analysisResults.score.suggestions.map((suggestion, index) => (
+                              {analysisResults.score.suggestions?.map((suggestion, index) => (
                                 <div key={index} className="flex items-start gap-3 p-4 border rounded-lg">
                                   <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border bg-muted text-sm font-medium">
                                     {index + 1}
