@@ -96,7 +96,6 @@ export default function AnalyzePage() {
         return
       }
       
-      // Check file type
       const validTypes = ['.pdf', '.doc', '.docx', '.txt', '.tex']
       const fileExtension = file.name.substring(file.name.lastIndexOf('.')).toLowerCase()
       if (!validTypes.includes(fileExtension)) {
@@ -109,7 +108,6 @@ export default function AnalyzePage() {
     }
   }
 
-  // Function to trigger file input click
   const handleSelectResumeClick = () => {
     if (fileInputRef.current) {
       fileInputRef.current.click()
@@ -131,7 +129,6 @@ export default function AnalyzePage() {
       setError(null)
       setIsUploading(true)
 
-      // Show upload progress animation for a moment
       await new Promise((resolve) => setTimeout(resolve, 1000))
       setIsUploading(false)
       setIsAnalyzing(true)
@@ -140,6 +137,8 @@ export default function AnalyzePage() {
       const response = await cvService.analyzeCVFile(selectedFile)
       
       if (response.data) {
+        console.log(response.data);
+        
         setAnalysisResults(response.data)
         setShowResults(true)
         toast({
@@ -184,6 +183,8 @@ export default function AnalyzePage() {
       const response = await cvService.analyzeCV(cvText)
       
       if (response.data) {
+        console.log(response.data);
+        
         setAnalysisResults(response.data)
         setShowResults(true)
         toast({

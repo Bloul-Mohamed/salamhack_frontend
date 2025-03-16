@@ -1,7 +1,7 @@
 import axios from "axios"
 
 // Base API configuration
-const API_BASE_URL = "http://stepdevs.click:8000/api"
+const API_BASE_URL = "http://127.0.0.1:8000/api"
 
 // Create axios instance with base configuration
 const api = axios.create({
@@ -37,7 +37,7 @@ export const cvService = {
   },
 
   // Score CV
-  scoreCV: async (cvText: string) => {
+  scoreCV: async (cvText: File) => {
     return api.post("/cv/score-cv/", { cv_text: cvText })
   },
 
