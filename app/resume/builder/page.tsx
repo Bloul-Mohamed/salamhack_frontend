@@ -844,7 +844,6 @@ export default function ResumeBuilderPage() {
                         </SelectContent>
                       </Select>
                     </div>
-                    // Replace the color scheme section in the settings tab with this updated version
                     <div className="space-y-2">
                       <Label htmlFor="colorScheme">Color Scheme</Label>
                       <div className="flex gap-2">
@@ -890,7 +889,6 @@ export default function ResumeBuilderPage() {
                       </Select>
                     </div>
                     <Separator />
-                    // Replace the section order part in the settings tab with this updated version
                     <div className="space-y-2">
                       <Label htmlFor="sections">Section Order</Label>
                       <p className="text-sm text-muted-foreground">Use the arrows to reorder sections</p>
