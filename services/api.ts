@@ -1,8 +1,7 @@
 import axios from "axios"
 
 // Base API configuration
-// Use relative URL for the proxy endpoint
-const API_BASE_URL = "/api/proxy"
+const API_BASE_URL = "http://api.cvgenius.stepdevs.click:8000/api"
 
 // Create axios instance with base configuration
 const api = axios.create({
@@ -148,3 +147,4 @@ export const planService = {
 }
 
 export default api
+
