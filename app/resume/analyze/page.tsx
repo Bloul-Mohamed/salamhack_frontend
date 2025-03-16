@@ -702,7 +702,7 @@ export default function AnalyzePage() {
                             analysisResults.analysis.industry_fit.length > 0 ? (
                               <div className="space-y-4">
                                 <div className="flex flex-wrap gap-2">
-                                  {analysisResults.analysis.industry_fit.map((industry, index) => {
+                                  {analysisResults.analysis.industry_fit?.map((industry, index) => {
                                     // Extract just the industry name from the text
                                     const industryName = industry.split(":")[0].trim()
                                     return (
@@ -713,7 +713,7 @@ export default function AnalyzePage() {
                                   })}
                                 </div>
                                 <div className="space-y-3">
-                                  {analysisResults.analysis.industry_fit.map((industry, index) => (
+                                  {analysisResults.analysis.industry_fit?.map((industry, index) => (
                                     <div key={index} className="text-sm">
                                       <p>{industry}</p>
                                     </div>
@@ -947,8 +947,355 @@ export default function AnalyzePage() {
                       <TabsTrigger value="action">Action Plan</TabsTrigger>
                     </TabsList>
 
-                    {/* Same tab content as in the upload section */}
-                    {/* Duplicated for brevity */}
+                    <TabsContent value="overview" className="mt-6">
+                      <div className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <Card>
+                            <CardHeader className="pb-2">
+                              <CardTitle className="text-lg">Overall Score</CardTitle>
+                            </CardHeader>
+                            <CardContent className="flex justify-center pt-2">
+                              <CircularScore score={scores.overall} size={150} label="Overall" />
+                            </CardContent>
+                          </Card>
+
+                          <Card className="md:col-span-2">
+                            <CardHeader className="pb-2">
+                              <CardTitle className="text-lg">Category Scores</CardTitle>
+                            </CardHeader>
+                            <CardContent className="pt-2">
+                              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                <CircularScore score={scores.content} size={90} label="Content" />
+                                <CircularScore score={scores.format} size={90} label="Format" />
+                                <CircularScore score={scores.ats} size={90} label="ATS" />
+                                <CircularScore score={scores.relevance} size={90} label="Relevance" />
+                                <CircularScore score={scores.impact} size={90} label="Impact" />
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </div>
+
+                        <Card>
+                          <CardHeader className="pb-2">
+                            <CardTitle className="text-lg">Content Breakdown</CardTitle>
+                          </CardHeader>
+                          <CardContent className="pt-2">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                              <div className="space-y-2">
+                                <div className="flex justify-between">
+                                  <span className="text-sm font-medium">Summary</span>
+                                  <span className="text-sm font-medium">{contentBreakdown.summary}/10</span>
+                                </div>
+                                <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                                  <div
+                                    className={`h-full rounded-full ${contentBreakdown.summary < 4 ? "bg-red-500" : contentBreakdown.summary < 7 ? "bg-yellow-500" : "bg-green-500"}`}
+                                    style={{ width: `${contentBreakdown.summary * 10}%` }}
+                                  ></div>
+                                </div>
+                              </div>
+
+                              <div className="space-y-2">
+                                <div className="flex justify-between">
+                                  <span className="text-sm font-medium">Experience</span>
+                                  <span className="text-sm font-medium">{contentBreakdown.experience}/10</span>
+                                </div>
+                                <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                                  <div
+                                    className={`h-full rounded-full ${contentBreakdown.experience < 4 ? "bg-red-500" : contentBreakdown.experience < 7 ? "bg-yellow-500" : "bg-green-500"}`}
+                                    style={{ width: `${contentBreakdown.experience * 10}%` }}
+                                  ></div>
+                                </div>
+                              </div>
+
+                              <div className="space-y-2">
+                                <div className="flex justify-between">
+                                  <span className="text-sm font-medium">Skills</span>
+                                  <span className="text-sm font-medium">{contentBreakdown.skills}/10</span>
+                                </div>
+                                <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                                  <div
+                                    className={`h-full rounded-full ${contentBreakdown.skills < 4 ? "bg-red-500" : contentBreakdown.skills < 7 ? "bg-yellow-500" : "bg-green-500"}`}
+                                    style={{ width: `${contentBreakdown.skills * 10}%` }}
+                                  ></div>
+                                </div>
+                              </div>
+
+                              <div className="space-y-2">
+                                <div className="flex justify-between">
+                                  <span className="text-sm font-medium">Education</span>
+                                  <span className="text-sm font-medium">{contentBreakdown.education}/10</span>
+                                </div>
+                                <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                                  <div
+                                    className={`h-full rounded-full ${contentBreakdown.education < 4 ? "bg-red-500" : contentBreakdown.education < 7 ? "bg-yellow-500" : "bg-green-500"}`}
+                                    style={{ width: `${contentBreakdown.education * 10}%` }}
+                                  ></div>
+                                </div>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+
+                        <Card>
+                          <CardHeader className="pb-2">
+                            <CardTitle className="text-lg">Key Suggestions</CardTitle>
+                          </CardHeader>
+                          <CardContent className="pt-2">
+                            <ul className="space-y-2">
+                              {analysisResults?.score?.suggestions?.slice(0, 3).map((suggestion, index) => (
+                                <li key={index} className="flex items-start gap-2">
+                                  <ChevronRight className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+                                  <span>{suggestion}</span>
+                                </li>
+                              ))}
+                            </ul>
+                            {(analysisResults?.score?.suggestions?.length || 0) > 3 && (
+                              <Button
+                                variant="link"
+                                className="mt-2 p-0 h-auto"
+                                onClick={() => setActiveResultTab("action")}
+                              >
+                                View all suggestions
+                              </Button>
+                            )}
+                          </CardContent>
+                        </Card>
+                      </div>
+                    </TabsContent>
+
+                    <TabsContent value="strengths" className="mt-6">
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center">
+                            <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
+                            Resume Strengths
+                          </CardTitle>
+                          <CardDescription>
+                            These are the positive aspects of your resume that stand out
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          {analysisResults?.analysis?.strengths && analysisResults.analysis.strengths.length > 0 ? (
+                            <ul className="space-y-4">
+                              {analysisResults.analysis.strengths.map((strength, index) => (
+                                <li
+                                  key={index}
+                                  className="flex items-start gap-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg"
+                                >
+                                  <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 shrink-0" />
+                                  <div>
+                                    <p>{strength}</p>
+                                  </div>
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <p className="text-muted-foreground">No strengths identified.</p>
+                          )}
+                        </CardContent>
+                      </Card>
+                    </TabsContent>
+
+                    <TabsContent value="weaknesses" className="mt-6">
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center">
+                            <AlertCircle className="h-5 w-5 text-yellow-500 mr-2" />
+                            Areas for Improvement
+                          </CardTitle>
+                          <CardDescription>These are the aspects of your resume that could be improved</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          {analysisResults?.analysis?.weaknesses && analysisResults.analysis.weaknesses.length > 0 ? (
+                            <ul className="space-y-4">
+                              {analysisResults.analysis.weaknesses.map((weakness, index) => (
+                                <li
+                                  key={index}
+                                  className="flex items-start gap-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg"
+                                >
+                                  <AlertCircle className="h-5 w-5 text-yellow-500 mt-0.5 shrink-0" />
+                                  <div>
+                                    <p>{weakness}</p>
+                                  </div>
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <p className="text-muted-foreground">No weaknesses identified.</p>
+                          )}
+                        </CardContent>
+                      </Card>
+                    </TabsContent>
+
+                    <TabsContent value="career" className="mt-6">
+                      <div className="space-y-6">
+                        <Card>
+                          <CardHeader>
+                            <CardTitle className="flex items-center">
+                              <Target className="h-5 w-5 text-primary mr-2" />
+                              Career Trajectory
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            {analysisResults?.analysis?.career_trajectory ? (
+                              <p className="text-sm">{analysisResults.analysis.career_trajectory}</p>
+                            ) : (
+                              <p className="text-muted-foreground">No career trajectory information available.</p>
+                            )}
+                          </CardContent>
+                        </Card>
+
+                        <Card>
+                          <CardHeader>
+                            <CardTitle className="flex items-center">
+                              <Briefcase className="h-5 w-5 text-primary mr-2" />
+                              Industry Fit
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            {analysisResults?.analysis?.industry_fit &&
+                            analysisResults.analysis.industry_fit.length > 0 ? (
+                              <div className="space-y-4">
+                                <div className="flex flex-wrap gap-2">
+                                  {analysisResults.analysis.industry_fit?.map((industry, index) => {
+                                    // Extract just the industry name from the text
+                                    const industryName = industry.split(":")[0].trim()
+                                    return (
+                                      <Badge key={index} variant="secondary" className="text-sm py-1">
+                                        {industryName}
+                                      </Badge>
+                                    )
+                                  })}
+                                </div>
+                                <div className="space-y-3">
+                                  {analysisResults.analysis.industry_fit?.map((industry, index) => (
+                                    <div key={index} className="text-sm">
+                                      <p>{industry}</p>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            ) : (
+                              <p className="text-muted-foreground">No industry fit information available.</p>
+                            )}
+                          </CardContent>
+                        </Card>
+
+                        <Card>
+                          <CardHeader>
+                            <CardTitle className="flex items-center">
+                              <Zap className="h-5 w-5 text-primary mr-2" />
+                              ATS Compatibility
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            {analysisResults?.analysis?.ats_compatibility ? (
+                              <div className="space-y-4">
+                                <div className="flex items-center gap-4">
+                                  <CircularScore score={scores.ats} size={80} />
+                                  <div>
+                                    <h4 className="font-medium">ATS Score: {scores.ats}/100</h4>
+                                    <p className="text-sm text-muted-foreground">
+                                      How well your resume performs with Applicant Tracking Systems
+                                    </p>
+                                  </div>
+                                </div>
+                                <Separator />
+                                <div>
+                                  <p className="text-sm">{analysisResults.analysis.ats_compatibility}</p>
+                                </div>
+                              </div>
+                            ) : (
+                              <p className="text-muted-foreground">No ATS compatibility information available.</p>
+                            )}
+                          </CardContent>
+                        </Card>
+                      </div>
+                    </TabsContent>
+
+                    <TabsContent value="skills" className="mt-6">
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center">
+                            <Award className="h-5 w-5 text-primary mr-2" />
+                            Skills Assessment
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          {analysisResults?.analysis?.skills_assessment ? (
+                            <div className="space-y-6">
+                              <div>
+                                <h3 className="font-medium mb-2">Technical Skills</h3>
+                                <div className="p-3 bg-muted rounded-lg">
+                                  <p className="text-sm">
+                                    {analysisResults.analysis.skills_assessment.technical_skills}
+                                  </p>
+                                </div>
+                              </div>
+
+                              <div>
+                                <h3 className="font-medium mb-2">Soft Skills</h3>
+                                <div className="p-3 bg-muted rounded-lg">
+                                  <p className="text-sm">{analysisResults.analysis.skills_assessment.soft_skills}</p>
+                                </div>
+                              </div>
+
+                              <div>
+                                <h3 className="font-medium mb-2">Skills Gaps</h3>
+                                <div className="p-3 bg-muted rounded-lg">
+                                  <p className="text-sm">{analysisResults.analysis.skills_assessment.skills_gaps}</p>
+                                </div>
+                              </div>
+                            </div>
+                          ) : (
+                            <p className="text-muted-foreground">No skills assessment information available.</p>
+                          )}
+                        </CardContent>
+                      </Card>
+                    </TabsContent>
+
+                    <TabsContent value="action" className="mt-6">
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center">
+                            <CheckCircle className="h-5 w-5 text-primary mr-2" />
+                            Action Plan
+                          </CardTitle>
+                          <CardDescription>Follow these steps to improve your resume</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          {analysisResults?.analysis?.action_plan && analysisResults.analysis.action_plan.length > 0 ? (
+                            <div className="space-y-4">
+                              {analysisResults.analysis.action_plan.map((action, index) => (
+                                <div key={index} className="flex items-start gap-3 p-4 border rounded-lg">
+                                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border bg-muted text-sm font-medium">
+                                    {index + 1}
+                                  </div>
+                                  <div>
+                                    <p className="text-sm">{action}</p>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : analysisResults?.score?.suggestions && analysisResults.score.suggestions.length > 0 ? (
+                            <div className="space-y-4">
+                              {analysisResults.score.suggestions.map((suggestion, index) => (
+                                <div key={index} className="flex items-start gap-3 p-4 border rounded-lg">
+                                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border bg-muted text-sm font-medium">
+                                    {index + 1}
+                                  </div>
+                                  <div>
+                                    <p className="text-sm">{suggestion}</p>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="text-muted-foreground">No action plan available.</p>
+                          )}
+                        </CardContent>
+                      </Card>
+                    </TabsContent>
                   </Tabs>
                 </div>
               )}
