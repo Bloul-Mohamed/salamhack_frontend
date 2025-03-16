@@ -587,22 +587,26 @@ export default function AnalyzePage() {
                           </CardHeader>
                           <CardContent className="pt-2">
                             <ul className="space-y-2">
-                              {analysisResults?.score?.suggestions?.slice(0, 3).map((suggestion, index) => (
-                                <li key={index} className="flex items-start gap-2">
-                                  <ChevronRight className="h-5 w-5 text-primary mt-0.5 shrink-0" />
-                                  <span>{suggestion}</span>
-                                </li>
-                              ))}
+                              {analysisResults?.score?.suggestions &&
+                                Array.isArray(analysisResults.score.suggestions) &&
+                                analysisResults.score.suggestions.slice(0, 3).map((suggestion, index) => (
+                                  <li key={index} className="flex items-start gap-2">
+                                    <ChevronRight className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+                                    <span>{suggestion}</span>
+                                  </li>
+                                ))}
                             </ul>
-                            {(analysisResults?.score?.suggestions?.length || 0) > 3 && (
-                              <Button
-                                variant="link"
-                                className="mt-2 p-0 h-auto"
-                                onClick={() => setActiveResultTab("action")}
-                              >
-                                View all suggestions
-                              </Button>
-                            )}
+                            {analysisResults?.score?.suggestions &&
+                              Array.isArray(analysisResults.score.suggestions) &&
+                              analysisResults.score.suggestions.length > 3 && (
+                                <Button
+                                  variant="link"
+                                  className="mt-2 p-0 h-auto"
+                                  onClick={() => setActiveResultTab("action")}
+                                >
+                                  View all suggestions
+                                </Button>
+                              )}
                           </CardContent>
                         </Card>
                       </div>
@@ -620,9 +624,11 @@ export default function AnalyzePage() {
                           </CardDescription>
                         </CardHeader>
                         <CardContent>
-                          {analysisResults?.analysis?.strengths && analysisResults.analysis.strengths.length > 0 ? (
+                          {analysisResults?.analysis?.strengths &&
+                          Array.isArray(analysisResults.analysis.strengths) &&
+                          analysisResults.analysis.strengths.length > 0 ? (
                             <ul className="space-y-4">
-                              {analysisResults.analysis.strengths?.map((strength, index) => (
+                              {analysisResults.analysis.strengths.map((strength, index) => (
                                 <li
                                   key={index}
                                   className="flex items-start gap-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg"
@@ -651,9 +657,11 @@ export default function AnalyzePage() {
                           <CardDescription>These are the aspects of your resume that could be improved</CardDescription>
                         </CardHeader>
                         <CardContent>
-                          {analysisResults?.analysis?.weaknesses && analysisResults.analysis.weaknesses.length > 0 ? (
+                          {analysisResults?.analysis?.weaknesses &&
+                          Array.isArray(analysisResults.analysis.weaknesses) &&
+                          analysisResults.analysis.weaknesses.length > 0 ? (
                             <ul className="space-y-4">
-                              {analysisResults.analysis.weaknesses?.map((weakness, index) => (
+                              {analysisResults.analysis.weaknesses.map((weakness, index) => (
                                 <li
                                   key={index}
                                   className="flex items-start gap-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg"
@@ -699,12 +707,14 @@ export default function AnalyzePage() {
                           </CardHeader>
                           <CardContent>
                             {analysisResults?.analysis?.industry_fit &&
+                            Array.isArray(analysisResults.analysis.industry_fit) &&
                             analysisResults.analysis.industry_fit.length > 0 ? (
                               <div className="space-y-4">
                                 <div className="flex flex-wrap gap-2">
-                                  {analysisResults.analysis.industry_fit?.map((industry, index) => {
+                                  {analysisResults.analysis.industry_fit.map((industry, index) => {
                                     // Extract just the industry name from the text
-                                    const industryName = industry.split(":")[0].trim()
+                                    const industryName =
+                                      typeof industry === "string" ? industry.split(":")[0].trim() : ""
                                     return (
                                       <Badge key={index} variant="secondary" className="text-sm py-1">
                                         {industryName}
@@ -713,9 +723,9 @@ export default function AnalyzePage() {
                                   })}
                                 </div>
                                 <div className="space-y-3">
-                                  {analysisResults.analysis.industry_fit?.map((industry, index) => (
+                                  {analysisResults.analysis.industry_fit.map((industry, index) => (
                                     <div key={index} className="text-sm">
-                                      <p>{industry}</p>
+                                      <p>{typeof industry === "string" ? industry : ""}</p>
                                     </div>
                                   ))}
                                 </div>
@@ -809,9 +819,11 @@ export default function AnalyzePage() {
                           <CardDescription>Follow these steps to improve your resume</CardDescription>
                         </CardHeader>
                         <CardContent>
-                          {analysisResults?.analysis?.action_plan && analysisResults.analysis.action_plan.length > 0 ? (
+                          {analysisResults?.analysis?.action_plan &&
+                          Array.isArray(analysisResults.analysis.action_plan) &&
+                          analysisResults.analysis.action_plan.length > 0 ? (
                             <div className="space-y-4">
-                              {analysisResults.analysis.action_plan?.map((action, index) => (
+                              {analysisResults.analysis.action_plan.map((action, index) => (
                                 <div key={index} className="flex items-start gap-3 p-4 border rounded-lg">
                                   <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border bg-muted text-sm font-medium">
                                     {index + 1}
@@ -822,9 +834,11 @@ export default function AnalyzePage() {
                                 </div>
                               ))}
                             </div>
-                          ) : analysisResults?.score?.suggestions && analysisResults.score.suggestions.length > 0 ? (
+                          ) : analysisResults?.score?.suggestions &&
+                            Array.isArray(analysisResults.score.suggestions) &&
+                            analysisResults.score.suggestions.length > 0 ? (
                             <div className="space-y-4">
-                              {analysisResults.score.suggestions?.map((suggestion, index) => (
+                              {analysisResults.score.suggestions.map((suggestion, index) => (
                                 <div key={index} className="flex items-start gap-3 p-4 border rounded-lg">
                                   <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border bg-muted text-sm font-medium">
                                     {index + 1}
@@ -1042,22 +1056,26 @@ export default function AnalyzePage() {
                           </CardHeader>
                           <CardContent className="pt-2">
                             <ul className="space-y-2">
-                              {analysisResults?.score?.suggestions?.slice(0, 3).map((suggestion, index) => (
-                                <li key={index} className="flex items-start gap-2">
-                                  <ChevronRight className="h-5 w-5 text-primary mt-0.5 shrink-0" />
-                                  <span>{suggestion}</span>
-                                </li>
-                              ))}
+                              {analysisResults?.score?.suggestions &&
+                                Array.isArray(analysisResults.score.suggestions) &&
+                                analysisResults.score.suggestions.slice(0, 3).map((suggestion, index) => (
+                                  <li key={index} className="flex items-start gap-2">
+                                    <ChevronRight className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+                                    <span>{suggestion}</span>
+                                  </li>
+                                ))}
                             </ul>
-                            {(analysisResults?.score?.suggestions?.length || 0) > 3 && (
-                              <Button
-                                variant="link"
-                                className="mt-2 p-0 h-auto"
-                                onClick={() => setActiveResultTab("action")}
-                              >
-                                View all suggestions
-                              </Button>
-                            )}
+                            {analysisResults?.score?.suggestions &&
+                              Array.isArray(analysisResults.score.suggestions) &&
+                              analysisResults.score.suggestions.length > 3 && (
+                                <Button
+                                  variant="link"
+                                  className="mt-2 p-0 h-auto"
+                                  onClick={() => setActiveResultTab("action")}
+                                >
+                                  View all suggestions
+                                </Button>
+                              )}
                           </CardContent>
                         </Card>
                       </div>
@@ -1075,9 +1093,11 @@ export default function AnalyzePage() {
                           </CardDescription>
                         </CardHeader>
                         <CardContent>
-                          {analysisResults?.analysis?.strengths && analysisResults.analysis.strengths.length > 0 ? (
+                          {analysisResults?.analysis?.strengths &&
+                          Array.isArray(analysisResults.analysis.strengths) &&
+                          analysisResults.analysis.strengths.length > 0 ? (
                             <ul className="space-y-4">
-                              {analysisResults.analysis.strengths?.map((strength, index) => (
+                              {analysisResults.analysis.strengths.map((strength, index) => (
                                 <li
                                   key={index}
                                   className="flex items-start gap-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg"
@@ -1106,9 +1126,11 @@ export default function AnalyzePage() {
                           <CardDescription>These are the aspects of your resume that could be improved</CardDescription>
                         </CardHeader>
                         <CardContent>
-                          {analysisResults?.analysis?.weaknesses && analysisResults.analysis.weaknesses.length > 0 ? (
+                          {analysisResults?.analysis?.weaknesses &&
+                          Array.isArray(analysisResults.analysis.weaknesses) &&
+                          analysisResults.analysis.weaknesses.length > 0 ? (
                             <ul className="space-y-4">
-                              {analysisResults.analysis.weaknesses?.map((weakness, index) => (
+                              {analysisResults.analysis.weaknesses.map((weakness, index) => (
                                 <li
                                   key={index}
                                   className="flex items-start gap-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg"
@@ -1154,12 +1176,14 @@ export default function AnalyzePage() {
                           </CardHeader>
                           <CardContent>
                             {analysisResults?.analysis?.industry_fit &&
+                            Array.isArray(analysisResults.analysis.industry_fit) &&
                             analysisResults.analysis.industry_fit.length > 0 ? (
                               <div className="space-y-4">
                                 <div className="flex flex-wrap gap-2">
-                                  {analysisResults.analysis.industry_fit?.map((industry, index) => {
+                                  {analysisResults.analysis.industry_fit.map((industry, index) => {
                                     // Extract just the industry name from the text
-                                    const industryName = industry.split(":")[0].trim()
+                                    const industryName =
+                                      typeof industry === "string" ? industry.split(":")[0].trim() : ""
                                     return (
                                       <Badge key={index} variant="secondary" className="text-sm py-1">
                                         {industryName}
@@ -1168,9 +1192,9 @@ export default function AnalyzePage() {
                                   })}
                                 </div>
                                 <div className="space-y-3">
-                                  {analysisResults.analysis.industry_fit?.map((industry, index) => (
+                                  {analysisResults.analysis.industry_fit.map((industry, index) => (
                                     <div key={index} className="text-sm">
-                                      <p>{industry}</p>
+                                      <p>{typeof industry === "string" ? industry : ""}</p>
                                     </div>
                                   ))}
                                 </div>
@@ -1264,9 +1288,11 @@ export default function AnalyzePage() {
                           <CardDescription>Follow these steps to improve your resume</CardDescription>
                         </CardHeader>
                         <CardContent>
-                          {analysisResults?.analysis?.action_plan && analysisResults.analysis.action_plan.length > 0 ? (
+                          {analysisResults?.analysis?.action_plan &&
+                          Array.isArray(analysisResults.analysis.action_plan) &&
+                          analysisResults.analysis.action_plan.length > 0 ? (
                             <div className="space-y-4">
-                              {analysisResults.analysis.action_plan?.map((action, index) => (
+                              {analysisResults.analysis.action_plan.map((action, index) => (
                                 <div key={index} className="flex items-start gap-3 p-4 border rounded-lg">
                                   <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border bg-muted text-sm font-medium">
                                     {index + 1}
@@ -1277,9 +1303,11 @@ export default function AnalyzePage() {
                                 </div>
                               ))}
                             </div>
-                          ) : analysisResults?.score?.suggestions && analysisResults.score.suggestions.length > 0 ? (
+                          ) : analysisResults?.score?.suggestions &&
+                            Array.isArray(analysisResults.score.suggestions) &&
+                            analysisResults.score.suggestions.length > 0 ? (
                             <div className="space-y-4">
-                              {analysisResults.score.suggestions?.map((suggestion, index) => (
+                              {analysisResults.score.suggestions.map((suggestion, index) => (
                                 <div key={index} className="flex items-start gap-3 p-4 border rounded-lg">
                                   <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border bg-muted text-sm font-medium">
                                     {index + 1}
