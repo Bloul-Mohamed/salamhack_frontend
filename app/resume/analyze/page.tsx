@@ -292,7 +292,8 @@ export default function AnalyzePage() {
 
       // Extract data from the file
       const response = await cvService.extractCvDataFromFile(selectedFile)
-
+      console.log(response.data);
+      
       if (response.data) {
         // Store the extracted data in the Zustand store
         useResumeStore.getState().setResumeData(response.data)

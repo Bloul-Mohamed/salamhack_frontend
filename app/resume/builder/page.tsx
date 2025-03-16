@@ -93,7 +93,11 @@ export default function ResumeBuilderPage() {
 
   // Use the resume store
   const resumeData = useResumeStore((state) => state.resumeData)
+  console.log(resumeData);
+  
   const mapExtractedDataToFormData = useResumeStore((state) => state.mapExtractedDataToFormData)
+  console.log(mapExtractedDataToFormData());
+  
   const setResumeData = useResumeStore((state) => state.setResumeData)
 
   // Load data from store on component mount
@@ -260,7 +264,8 @@ export default function ResumeBuilderPage() {
 
         // Extract data from the file
         const response = await cvService.extractCvDataFromFile(file)
-
+        console.log(response);
+        
         if (response.data) {
           // Store the extracted data in the Zustand store
           setResumeData(response.data)

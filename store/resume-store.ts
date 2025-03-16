@@ -241,47 +241,76 @@ export const useResumeStore = create<ResumeStore>()(
 
         // Process skills from the API response
         if (resumeData.skills) {
-          // Map technical skills
-          if (
-            resumeData.skills["Software Development"] ||
-            resumeData.skills["Web Development"] ||
-            resumeData.skills["Programming Languages"]
-          ) {
-            skills.technical = [
-              ...(resumeData.skills["Software Development"] || []),
-              ...(resumeData.skills["Web Development"] || []),
-              ...(resumeData.skills["Programming Languages"] || []),
-            ]
+          console.log(resumeData.skills)
 
-            if (skills.technical.length === 0) skills.technical = [""]
+          // Check if skills has a direct "technical" property
+          if (resumeData.skills.technical && Array.isArray(resumeData.skills.technical)) {
+            skills.technical = resumeData.skills.technical
+          }
+          // Check if skills has a direct "soft" property
+          if (resumeData.skills.soft && Array.isArray(resumeData.skills.soft)) {
+            skills.soft = resumeData.skills.soft
+          }
+          // Check if skills has a direct "languages" property
+          if (resumeData.skills.languages && Array.isArray(resumeData.skills.languages)) {
+            skills.languages = resumeData.skills.languages
+          } else if (resumeData.skills.Languages && Array.isArray(resumeData.skills.Languages)) {
+            skills.languages = resumeData.skills.Languages
+          }
+          // Check if skills has a direct "tools" property
+          if (resumeData.skills.tools && Array.isArray(resumeData.skills.tools)) {
+            skills.tools = resumeData.skills.tools
           }
 
-          // Map soft skills
-          if (
-            resumeData.skills["Problem-Solving & Algorithms"] ||
-            resumeData.skills["Workshop & Training Facilitation"]
-          ) {
-            skills.soft = [
-              ...(resumeData.skills["Problem-Solving & Algorithms"] || []),
-              ...(resumeData.skills["Workshop & Training Facilitation"] || []),
-            ]
-
-            if (skills.soft.length === 0) skills.soft = [""]
+          // If no specific categories are found, try to map based on available keys
+          if (skills.technical.length === 0 || skills.technical[0] === "") {
+            // Iterate through all keys in resumeData.skills
+            Object.entries(resumeData.skills).forEach(([key, value]) => {
+              if (Array.isArray(value)) {
+                // Map to appropriate category based on key name
+                if (
+                  key.toLowerCase().includes("technical") ||
+                  key.toLowerCase().includes("programming") ||
+                  key.toLowerCase().includes("development") ||
+                  key.toLowerCase().includes("web") ||
+                  key.toLowerCase().includes("software")
+                ) {
+                  skills.technical = [...skills.technical, ...value]
+                  if (skills.technical[0] === "") skills.technical.shift()
+                } else if (
+                  key.toLowerCase().includes("soft") ||
+                  key.toLowerCase().includes("communication") ||
+                  key.toLowerCase().includes("problem") ||
+                  key.toLowerCase().includes("leadership")
+                ) {
+                  skills.soft = [...skills.soft, ...value]
+                  if (skills.soft[0] === "") skills.soft.shift()
+                } else if (key.toLowerCase().includes("language")) {
+                  skills.languages = [...skills.languages, ...value]
+                  if (skills.languages[0] === "") skills.languages.shift()
+                } else if (
+                  key.toLowerCase().includes("tool") ||
+                  key.toLowerCase().includes("tech") ||
+                  key.toLowerCase().includes("design") ||
+                  key.toLowerCase().includes("ui") ||
+                  key.toLowerCase().includes("ux")
+                ) {
+                  skills.tools = [...skills.tools, ...value]
+                  if (skills.tools[0] === "") skills.tools.shift()
+                } else {
+                  // If no specific category matches, add to technical by default
+                  skills.technical = [...skills.technical, ...value]
+                  if (skills.technical[0] === "") skills.technical.shift()
+                }
+              }
+            })
           }
 
-          // Map languages
-          if (resumeData.skills["Languages"]) {
-            skills.languages = resumeData.skills["Languages"]
-
-            if (skills.languages.length === 0) skills.languages = [""]
-          }
-
-          // Map tools
-          if (resumeData.skills["UI/UX Design"] || resumeData.skills["Techs"]) {
-            skills.tools = [...(resumeData.skills["UI/UX Design"] || []), ...(resumeData.skills["Techs"] || [])]
-
-            if (skills.tools.length === 0) skills.tools = [""]
-          }
+          // Ensure all skill categories have at least an empty string
+          if (skills.technical.length === 0) skills.technical = [""]
+          if (skills.soft.length === 0) skills.soft = [""]
+          if (skills.languages.length === 0) skills.languages = [""]
+          if (skills.tools.length === 0) skills.tools = [""]
         }
 
         return {
@@ -293,7 +322,7 @@ export const useResumeStore = create<ResumeStore>()(
       },
     }),
     {
-      name: "resume-storage", 
+      name: "resume-storage", // name of the item in localStorage
     },
   ),
 )
