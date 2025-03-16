@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import {
   ChevronLeft,
@@ -18,6 +18,8 @@ import {
   Languages,
   Settings,
   Upload,
+  FileUp,
+  Loader2,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -26,8 +28,9 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { generateLatexCV, convertLatexToPdf, convertLatexToWord, analyzeCV, scoreCV } from "@/lib/api-service"
+import { cvService } from "@/services/api"
 import { toast } from "@/hooks/use-toast"
+import { useResumeStore } from "@/store/resume-store"
 
 export default function ResumeBuilderPage() {
   const router = useRouter()
@@ -36,6 +39,8 @@ export default function ResumeBuilderPage() {
   const [latexCode, setLatexCode] = useState("")
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [analysisResults, setAnalysisResults] = useState(null)
+  const [isUploading, setIsUploading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Form state
   const [personalInfo, setPersonalInfo] = useState({
@@ -85,6 +90,30 @@ export default function ResumeBuilderPage() {
     "Skills",
     "Languages",
   ])
+
+  // Use the resume store
+  const resumeData = useResumeStore((state) => state.resumeData)
+  const mapExtractedDataToFormData = useResumeStore((state) => state.mapExtractedDataToFormData)
+  const setResumeData = useResumeStore((state) => state.setResumeData)
+
+  // Load data from store on component mount
+  useEffect(() => {
+    if (resumeData) {
+      const formData = mapExtractedDataToFormData()
+
+      // Set form state from the mapped data
+      setPersonalInfo(formData.personalInfo)
+      setExperiences(formData.experiences)
+      setEducation(formData.education)
+      setSkills(formData.skills)
+
+      // Show success toast
+      toast({
+        title: "Resume Data Loaded",
+        description: "Your resume data has been loaded into the builder",
+      })
+    }
+  }, [resumeData, mapExtractedDataToFormData])
 
   const tabs = [
     { id: "personal", label: "Personal Info", icon: <FileText className="h-4 w-4" /> },
@@ -199,6 +228,76 @@ export default function ResumeBuilderPage() {
     setSectionOrder(newOrder)
   }
 
+  // Handle file upload functionality
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0]
+
+      // Check file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "File Too Large",
+          description: "File size exceeds 5MB limit. Please select a smaller file.",
+          variant: "destructive",
+        })
+        return
+      }
+
+      // Check file type
+      const validTypes = [".pdf", ".doc", ".docx", ".txt", ".tex"]
+      const fileExtension = file.name.substring(file.name.lastIndexOf(".")).toLowerCase()
+      if (!validTypes.includes(fileExtension)) {
+        toast({
+          title: "Invalid File Type",
+          description: "Please upload PDF, DOC, DOCX, TXT, or TEX files.",
+          variant: "destructive",
+        })
+        return
+      }
+
+      try {
+        setIsUploading(true)
+
+        // Extract data from the file
+        const response = await cvService.extractCvDataFromFile(file)
+
+        if (response.data) {
+          // Store the extracted data in the Zustand store
+          setResumeData(response.data)
+
+          // Map the data to form fields
+          const formData = useResumeStore.getState().mapExtractedDataToFormData()
+
+          // Update form state
+          setPersonalInfo(formData.personalInfo)
+          setExperiences(formData.experiences)
+          setEducation(formData.education)
+          setSkills(formData.skills)
+
+          toast({
+            title: "Resume Imported",
+            description: "Your resume data has been successfully imported",
+          })
+        }
+      } catch (error) {
+        console.error("Error extracting resume data:", error)
+        toast({
+          title: "Import Failed",
+          description: "Failed to extract data from your resume. Please try again.",
+          variant: "destructive",
+        })
+      } finally {
+        setIsUploading(false)
+      }
+    }
+  }
+
+  const handleUploadClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click()
+    }
+  }
+
   const generateResume = async () => {
     try {
       setIsGenerating(true)
@@ -207,16 +306,16 @@ export default function ResumeBuilderPage() {
         experience: experiences,
         education: education,
         skills: skills,
-        sections: sectionOrder
+        sections: sectionOrder,
       }
-      
+
       // @ts-ignore
-      const response = await generateLatexCV(cvData)
+      const response = await cvService.generateLatexCV(cvData)
       const latexCode = response.latex_content
-      
+
       // Store in localStorage for preview page
       localStorage.setItem("latexCode", latexCode)
-      
+
       // Navigate to preview
       router.push("/resume/preview")
     } catch (error) {
@@ -224,7 +323,7 @@ export default function ResumeBuilderPage() {
       toast({
         title: "Error",
         description: "Failed to generate resume. Please try again.",
-        variant: "destructive"
+        variant: "destructive",
       })
     } finally {
       setIsGenerating(false)
@@ -243,8 +342,8 @@ export default function ResumeBuilderPage() {
 
     try {
       try {
-                    // @ts-ignore
-        const response = await convertLatexToPdf({ latex_content: latexCode })
+        // @ts-ignore
+        const response = await cvService.latexToPdf(latexCode)
         // Handle PDF download
         toast({
           title: "Success",
@@ -290,8 +389,8 @@ export default function ResumeBuilderPage() {
 
     try {
       try {
-                    // @ts-ignore
-        const response = await convertLatexToWord({ latex_content: latexCode })
+        // @ts-ignore
+        const response = await cvService.latexToWord(latexCode)
         // Handle Word download
         toast({
           title: "Success",
@@ -333,22 +432,22 @@ export default function ResumeBuilderPage() {
         personal_info: personalInfo,
         experience: experiences,
         education: education,
-        skills: skills
+        skills: skills,
       })
-      
-      const response = await scoreCV(cvText)
+
+      const response = await cvService.scoreCV(cvText)
       setAnalysisResults(response)
-      
+
       toast({
         title: "Analysis Complete",
-        description: `Overall Score: ${response.score.overall}/100`
+        description: `Overall Score: ${response.score.overall}/100`,
       })
     } catch (error) {
       console.error("Error analyzing resume:", error)
       toast({
         title: "Error",
         description: "Failed to analyze resume. Please try again.",
-        variant: "destructive"
+        variant: "destructive",
       })
     } finally {
       setIsAnalyzing(false)
@@ -363,8 +462,9 @@ export default function ResumeBuilderPage() {
           <p className="text-muted-foreground">Create and customize your professional resume</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={analyzeResume}>
-            <Sparkles className="mr-2 h-4 w-4" /> Analyze
+          <Button variant="outline" size="sm" onClick={analyzeResume} disabled={isAnalyzing}>
+            {isAnalyzing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+            {isAnalyzing ? "Analyzing..." : "Analyze"}
           </Button>
           <Button variant="outline" size="sm">
             <Eye className="mr-2 h-4 w-4" /> Preview
@@ -372,7 +472,12 @@ export default function ResumeBuilderPage() {
           <Button variant="outline" size="sm" onClick={exportAsPDF}>
             <Download className="mr-2 h-4 w-4" /> Export PDF
           </Button>
-          <Button size="sm" className="blue-gradient" onClick={generateResume} disabled={isGenerating}>
+          <Button
+            size="sm"
+            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
+            onClick={generateResume}
+            disabled={isGenerating}
+          >
             <Save className="mr-2 h-4 w-4" /> {isGenerating ? "Generating..." : "Generate Resume"}
           </Button>
         </div>
@@ -408,12 +513,33 @@ export default function ResumeBuilderPage() {
                 <p className="text-sm text-muted-foreground">
                   Upload an existing resume to automatically fill in your information.
                 </p>
-                <input type="file" id="resume-upload" className="hidden" accept=".pdf,.doc,.docx,.txt,.tex" />
-                <label htmlFor="resume-upload">
-                  <Button variant="outline" className="w-full" size="sm" >
-                    Upload Resume
-                  </Button>
-                </label>
+                <input
+                  type="file"
+                  id="resume-upload"
+                  ref={fileInputRef}
+                  className="hidden"
+                  accept=".pdf,.doc,.docx,.txt,.tex"
+                  onChange={handleFileChange}
+                />
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  size="sm"
+                  onClick={handleUploadClick}
+                  disabled={isUploading}
+                >
+                  {isUploading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Importing...
+                    </>
+                  ) : (
+                    <>
+                      <FileUp className="mr-2 h-4 w-4" />
+                      Upload Resume
+                    </>
+                  )}
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -933,8 +1059,23 @@ export default function ResumeBuilderPage() {
             </Button>
 
             {activeTab === tabs[tabs.length - 1].id ? (
-              <Button size="sm" className="blue-gradient" onClick={generateResume} disabled={isGenerating}>
-                <Save className="mr-2 h-4 w-4" /> {isGenerating ? "Generating..." : "Generate Resume"}
+              <Button
+                size="sm"
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
+                onClick={generateResume}
+                disabled={isGenerating}
+              >
+                {isGenerating ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Save className="mr-2 h-4 w-4" />
+                    Generate Resume
+                  </>
+                )}
               </Button>
             ) : (
               <Button size="sm" onClick={nextTab}>

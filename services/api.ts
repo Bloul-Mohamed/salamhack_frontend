@@ -67,6 +67,17 @@ export const cvService = {
       },
     )
   },
+
+  extractCvDataFromFile: async (file: File) => {
+    const formData = new FormData()
+    formData.append("cv_file", file)
+
+    return api.post("/cv/extract-cv-data-from-file/", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    })
+  },
 }
 
 // User Management
