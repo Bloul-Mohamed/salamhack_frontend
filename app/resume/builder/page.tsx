@@ -311,6 +311,7 @@ export default function ResumeBuilderPage() {
 
       // @ts-ignore
       const response = await cvService.generateLatexCV(cvData)
+      // @ts-ignore
       const latexCode = response.latex_content
 
       // Store in localStorage for preview page
@@ -425,34 +426,34 @@ export default function ResumeBuilderPage() {
     }
   }
 
-  const analyzeResume = async () => {
-    try {
-      setIsAnalyzing(true)
-      const cvText = JSON.stringify({
-        personal_info: personalInfo,
-        experience: experiences,
-        education: education,
-        skills: skills,
-      })
+  // const analyzeResume = async () => {
+  //   try {
+  //     setIsAnalyzing(true)
+  //     const cvText = JSON.stringify({
+  //       personal_info: personalInfo,
+  //       experience: experiences,
+  //       education: education,
+  //       skills: skills,
+  //     })
 
-      const response = await cvService.scoreCV(cvText)
-      setAnalysisResults(response)
+  //     const response = await cvService.scoreCV(cvText)
+  //     setAnalysisResults(response)
 
-      toast({
-        title: "Analysis Complete",
-        description: `Overall Score: ${response.score.overall}/100`,
-      })
-    } catch (error) {
-      console.error("Error analyzing resume:", error)
-      toast({
-        title: "Error",
-        description: "Failed to analyze resume. Please try again.",
-        variant: "destructive",
-      })
-    } finally {
-      setIsAnalyzing(false)
-    }
-  }
+  //     toast({
+  //       title: "Analysis Complete",
+  //       description: `Overall Score: ${response.score.overall}/100`,
+  //     })
+  //   } catch (error) {
+  //     console.error("Error analyzing resume:", error)
+  //     toast({
+  //       title: "Error",
+  //       description: "Failed to analyze resume. Please try again.",
+  //       variant: "destructive",
+  //     })
+  //   } finally {
+  //     setIsAnalyzing(false)
+  //   }
+  // }
 
   return (
     <div className="container py-6 space-y-6 max-w-6xl">
@@ -462,7 +463,7 @@ export default function ResumeBuilderPage() {
           <p className="text-muted-foreground">Create and customize your professional resume</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={analyzeResume} disabled={isAnalyzing}>
+          <Button variant="outline" size="sm" disabled={isAnalyzing}>
             {isAnalyzing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
             {isAnalyzing ? "Analyzing..." : "Analyze"}
           </Button>
