@@ -20,6 +20,12 @@ export function SiteHeader() {
 
         <div className="hidden md:flex md:flex-1 md:items-center md:justify-between">
           <nav className="flex items-center space-x-6 text-sm font-medium">
+            <Link href="/resume/builder" className="transition-colors hover:text-foreground/80">
+              Resume Builder
+            </Link>
+            <Link href="/resume/analyze" className="transition-colors hover:text-foreground/80">
+              Resume Analysis
+            </Link>
             <Link href="/features" className="transition-colors hover:text-foreground/80">
               Features
             </Link>
@@ -55,6 +61,12 @@ export function SiteHeader() {
               <span className="sr-only">Close menu</span>
             </Button>
             <nav className="flex flex-col space-y-6 text-lg font-medium">
+              <Link href="/resume/builder" className="hover:text-foreground/80" onClick={() => setIsMenuOpen(false)}>
+                Resume Builder
+              </Link>
+              <Link href="/resume/analyze" className="hover:text-foreground/80" onClick={() => setIsMenuOpen(false)}>
+                Resume Analysis
+              </Link>
               <Link href="/features" className="hover:text-foreground/80" onClick={() => setIsMenuOpen(false)}>
                 Features
               </Link>
