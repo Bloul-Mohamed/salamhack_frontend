@@ -169,7 +169,6 @@ export default function ResumeBuilderPage() {
     { id: "education", label: "Education", icon: <GraduationCap className="h-4 w-4" /> },
     { id: "skills", label: "Skills", icon: <Award className="h-4 w-4" /> },
     { id: "languages", label: "Languages", icon: <Languages className="h-4 w-4" /> },
-    // { id: "settings", label: "Settings", icon: <Settings className="h-4 w-4" /> },
   ]
 
   const nextTab = () => {
@@ -199,7 +198,6 @@ export default function ResumeBuilderPage() {
 
   const addExperience = () => {
     setExperiences([
-      ...experiences,
       {
         title: "",
         company: "",
@@ -208,6 +206,7 @@ export default function ResumeBuilderPage() {
         endDate: "",
         description: "",
       },
+      ...experiences,
     ])
   }
 
@@ -225,7 +224,6 @@ export default function ResumeBuilderPage() {
 
   const addEducation = () => {
     setEducation([
-      ...education,
       {
         degree: "",
         school: "",
@@ -234,6 +232,8 @@ export default function ResumeBuilderPage() {
         endDate: "",
         description: "",
       },
+      ...education,
+      
     ])
   }
 
@@ -558,11 +558,57 @@ export default function ResumeBuilderPage() {
       const response = await cvService.scoreCV(cvText)
       setAnalysisResults(response.data)
 
+      // Get the score
+      const overallScore = response.data?.score?.overall || 0
+
+      // Determine color based on score
+      let scoreColor = "text-red-500"
+      if (overallScore >= 70) {
+        scoreColor = "text-green-500"
+      } else if (overallScore >= 40) {
+        scoreColor = "text-amber-500"
+      }
+
+      // Show toast with score
       toast({
         title: "Analysis Complete",
-        description: `Overall Score: ${response.data.score.overall}/100`,
+        description: (
+          <div className="flex items-center">
+            <span>Your resume scored </span>
+            <span className={`text-lg font-bold mx-1 ${scoreColor}`}>{overallScore}/100</span>
+          </div>
+        ),
       })
 
+      // Add score display to the UI
+      const scoreElement = document.createElement("div")
+      scoreElement.id = "resume-score-display"
+      scoreElement.className = `fixed bottom-6 left-6 bg-white dark:bg-gray-800 rounded-lg p-4 shadow-lg flex items-center z-50 border ${overallScore >= 70 ? "border-green-500" : overallScore >= 40 ? "border-amber-500" : "border-red-500"}`
+
+      scoreElement.innerHTML = `
+        <div class="mr-3 ${scoreColor} text-3xl font-bold">${overallScore}</div>
+        <div>
+          <div class="font-medium">Resume Score</div>
+          <div class="text-sm text-muted-foreground">out of 100</div>
+        </div>
+      `
+
+      // Remove existing score display if any
+      const existingScore = document.getElementById("resume-score-display")
+      if (existingScore) {
+        existingScore.remove()
+      }
+
+      // Add to the document
+      document.body.appendChild(scoreElement)
+
+      // Remove after 5 seconds
+      setTimeout(() => {
+        const element = document.getElementById("resume-score-display")
+        if (element) {
+          element.remove()
+        }
+      }, 5000)
     } catch (error) {
       console.error("Error analyzing resume:", error)
       toast({
@@ -669,7 +715,11 @@ export default function ResumeBuilderPage() {
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold">Work Experience</h2>
-              <Button size="sm" variant="outline" onClick={addExperience}>
+              <Button
+                size="sm"
+                className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white"
+                onClick={addExperience}
+              >
                 Add Experience
               </Button>
             </div>
@@ -745,7 +795,12 @@ export default function ResumeBuilderPage() {
 
                   <div className="flex justify-end gap-2">
                     {experiences.length > 1 && (
-                      <Button variant="outline" size="sm" onClick={() => removeExperience(index)}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => removeExperience(index)}
+                        className="bg-red-50 text-red-600 hover:bg-red-100 border-red-200"
+                      >
                         Delete
                       </Button>
                     )}
@@ -767,7 +822,11 @@ export default function ResumeBuilderPage() {
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold">Education</h2>
-              <Button size="sm" variant="outline" onClick={addEducation}>
+              <Button
+                size="sm"
+                className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white"
+                onClick={addEducation}
+              >
                 Add Education
               </Button>
             </div>
@@ -845,7 +904,12 @@ export default function ResumeBuilderPage() {
 
                   <div className="flex justify-end gap-2">
                     {education.length > 1 && (
-                      <Button variant="outline" size="sm" onClick={() => removeEducation(index)}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => removeEducation(index)}
+                        className="bg-red-50 text-red-600 hover:bg-red-100 border-red-200"
+                      >
                         Delete
                       </Button>
                     )}
@@ -863,17 +927,20 @@ export default function ResumeBuilderPage() {
             <p className="text-sm text-muted-foreground">Add your professional skills and competencies.</p>
 
             <Tabs defaultValue="technical" className="w-full">
-              <TabsList className="grid grid-cols-4 mb-4">
+              <TabsList className="grid grid-cols-3 mb-4">
                 <TabsTrigger value="technical">Technical</TabsTrigger>
                 <TabsTrigger value="soft">Soft Skills</TabsTrigger>
                 <TabsTrigger value="tools">Tools</TabsTrigger>
-                <TabsTrigger value="languages">Languages</TabsTrigger>
               </TabsList>
 
               <TabsContent value="technical" className="space-y-4">
                 <div className="flex justify-between items-center">
                   <Label className="text-base font-medium">Technical Skills</Label>
-                  <Button size="sm" variant="outline" onClick={() => addSkill("technical")}>
+                  <Button
+                    size="sm"
+                    className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white"
+                    onClick={() => addSkill("technical")}
+                  >
                     Add Skill
                   </Button>
                 </div>
@@ -898,7 +965,11 @@ export default function ResumeBuilderPage() {
               <TabsContent value="soft" className="space-y-4">
                 <div className="flex justify-between items-center">
                   <Label className="text-base font-medium">Soft Skills</Label>
-                  <Button size="sm" variant="outline" onClick={() => addSkill("soft")}>
+                  <Button
+                    size="sm"
+                    className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white"
+                    onClick={() => addSkill("soft")}
+                  >
                     Add Skill
                   </Button>
                 </div>
@@ -923,7 +994,11 @@ export default function ResumeBuilderPage() {
               <TabsContent value="tools" className="space-y-4">
                 <div className="flex justify-between items-center">
                   <Label className="text-base font-medium">Tools & Software</Label>
-                  <Button size="sm" variant="outline" onClick={() => addSkill("tools")}>
+                  <Button
+                    size="sm"
+                    className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white"
+                    onClick={() => addSkill("tools")}
+                  >
                     Add Tool
                   </Button>
                 </div>
@@ -944,35 +1019,9 @@ export default function ResumeBuilderPage() {
                   ))}
                 </div>
               </TabsContent>
-
-              <TabsContent value="languages" className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <Label className="text-base font-medium">Languages</Label>
-                  <Button size="sm" variant="outline" onClick={() => addSkill("languages")}>
-                    Add Language
-                  </Button>
-                </div>
-                <div className="space-y-2">
-                  {skills.languages.map((language, index) => (
-                    <div key={index} className="flex items-center gap-2">
-                      <Input
-                        value={language}
-                        onChange={(e) => handleSkillChange("languages", index, e.target.value)}
-                        placeholder="e.g. English (Native)"
-                      />
-                      {skills.languages.length > 1 && (
-                        <Button variant="ghost" size="sm" onClick={() => removeSkill("languages", index)}>
-                          ×
-                        </Button>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </TabsContent>
             </Tabs>
 
             <Button
-              variant="outline"
               size="sm"
               className="mt-2 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white"
             >
@@ -981,35 +1030,39 @@ export default function ResumeBuilderPage() {
           </div>
         )
 
-      case "languages":
-        return (
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold">Languages</h2>
-              <Button size="sm" variant="outline" onClick={() => addSkill("languages")}>
-                Add Language
-              </Button>
-            </div>
-            <p className="text-sm text-muted-foreground">Add languages you speak and your proficiency level.</p>
+      // case "languages":
+      //   return (
+      //     <div className="space-y-4">
+      //       <div className="flex justify-between items-center">
+      //         <h2 className="text-xl font-semibold">Languages</h2>
+      //         <Button
+      //           size="sm"
+      //           className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white"
+      //           onClick={() => addSkill("languages")}
+      //         >
+      //           Add Language
+      //         </Button>
+      //       </div>
+      //       <p className="text-sm text-muted-foreground">Add languages you speak and your proficiency level.</p>
 
-            <div className="space-y-2">
-              {skills.languages.map((language, index) => (
-                <div key={index} className="flex items-center gap-2">
-                  <Input
-                    value={language}
-                    onChange={(e) => handleSkillChange("languages", index, e.target.value)}
-                    placeholder="e.g. English (Native)"
-                  />
-                  {skills.languages.length > 1 && (
-                    <Button variant="ghost" size="sm" onClick={() => removeSkill("languages", index)}>
-                      ×
-                    </Button>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )
+      //       <div className="space-y-2">
+      //         {skills.languages.map((language, index) => (
+      //           <div key={index} className="flex items-center gap-2">
+      //             <Input
+      //               value={language}
+      //               onChange={(e) => handleSkillChange("languages", index, e.target.value)}
+      //               placeholder="e.g. English (Native)"
+      //             />
+      //             {skills.languages.length > 1 && (
+      //               <Button variant="ghost" size="sm" onClick={() => removeSkill("languages", index)}>
+      //                 ×
+      //               </Button>
+      //             )}
+      //           </div>
+      //         ))}
+      //       </div>
+      //     </div>
+      //   )
 
       // case "settings":
       //   return (
@@ -1120,7 +1173,7 @@ export default function ResumeBuilderPage() {
   // Render the resume preview
   const renderResumePreview = () => {
     return (
-      <div className="border rounded-md p-6 bg-white shadow-sm  max-h-[400px] overflow-y-scroll">
+      <div className="border rounded-md p-6 bg-white shadow-sm h-[400px] overflow-y-scroll">
         <div className="space-y-6">
           {/* Header with name and title */}
           <div className="text-center border-b pb-4">
@@ -1274,15 +1327,6 @@ export default function ResumeBuilderPage() {
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
-            {/* <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setPreviewMode(!previewMode)}
-              className="bg-indigo-50 text-indigo-600 hover:bg-indigo-100 border-indigo-200"
-            >
-              {previewMode ? <EyeOff className="mr-2 h-4 w-4" /> : <Eye className="mr-2 h-4 w-4" />}
-              {previewMode ? "Hide Preview" : "Preview"}
-            </Button> */}
 
             <Button
               variant="outline"
@@ -1357,7 +1401,11 @@ export default function ResumeBuilderPage() {
                 <Button
                   key={tab.id}
                   variant={activeTab === tab.id ? "default" : "ghost"}
-                  className="justify-start"
+                  className={`justify-start ${
+                    activeTab === tab.id
+                      ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
+                      : "bg-blue-50 text-blue-600 hover:bg-blue-100"
+                  }`}
                   onClick={() => {
                     setActiveTab(tab.id)
                     setMobileMenuOpen(false)
@@ -1418,7 +1466,11 @@ export default function ResumeBuilderPage() {
                   <Button
                     key={tab.id}
                     variant={activeTab === tab.id ? "default" : "outline"}
-                    className={`flex items-center ${activeTab === tab.id ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white" : ""}`}
+                    className={`flex items-center ${
+                      activeTab === tab.id
+                        ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
+                        : "bg-blue-50 text-blue-600 hover:bg-blue-100 border-blue-200"
+                    }`}
                     onClick={() => setActiveTab(tab.id)}
                   >
                     {tab.icon}
@@ -1437,7 +1489,7 @@ export default function ResumeBuilderPage() {
                   size="sm"
                   onClick={prevTab}
                   disabled={activeTab === tabs[0].id}
-                  className="bg-gray-50 text-gray-700 hover:bg-gray-100 border-gray-200"
+                  className="bg-indigo-50 text-indigo-600 hover:bg-indigo-100 border-indigo-200"
                 >
                   <ChevronLeft className="mr-2 h-4 w-4" /> Previous
                 </Button>
@@ -1492,8 +1544,7 @@ export default function ResumeBuilderPage() {
                     onChange={handleFileChange}
                   />
                   <Button
-                    variant="outline"
-                    className="w-full"
+                    className="w-full bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 text-white"
                     size="sm"
                     onClick={handleUploadClick}
                     disabled={isUploading}
@@ -1517,7 +1568,12 @@ export default function ResumeBuilderPage() {
                     <Sparkles className="h-4 w-4 mr-2 text-primary" />
                     AI Suggestions
                   </h3>
-                  <Button className="w-full" variant="outline" size="sm" onClick={analyzeResume} disabled={isAnalyzing}>
+                  <Button
+                    className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
+                    size="sm"
+                    onClick={analyzeResume}
+                    disabled={isAnalyzing}
+                  >
                     {isAnalyzing ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />

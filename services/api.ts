@@ -68,9 +68,13 @@ export const cvService = {
     )
   },
 
-  // Generate LaTeX CV
+  // Generate LaTeX CV - Fix for 415 error
   generateLatexCV: async (cvData: any) => {
+    // Ensure we're explicitly setting the content type
     return api.post("", cvData, {
+      headers: {
+        "Content-Type": "application/json",
+      },
       params: {
         path: "/cv/generate-latex-cv/",
       },
