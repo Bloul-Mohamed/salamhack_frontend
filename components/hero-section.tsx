@@ -2,6 +2,7 @@ import Link from "next/link"
 import { ArrowRight, FileText, BarChart, Target } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { OrbitingCircles } from "./magicui/orbiting-circles";
+import Image from "next/image";
 
 export function OrbitingCirclesDemo() {
   return (
@@ -121,29 +122,9 @@ export function HeroSection() {
           </div>
           <div className="flex items-center justify-center">
             <div className="relative w-full max-w-[500px] aspect-[4/5] overflow-hidden rounded-xl border bg-background shadow-lg">
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30">
-                <div className="absolute inset-0 bg-white/80 dark:bg-black/50 backdrop-blur-sm">
-                  <div className="p-8">
-                    <div className="h-6 w-24 rounded-md bg-primary/10 mb-4"></div>
-                    <div className="space-y-2">
-                      <div className="h-4 w-full rounded-md bg-primary/10"></div>
-                      <div className="h-4 w-5/6 rounded-md bg-primary/10"></div>
-                      <div className="h-4 w-4/6 rounded-md bg-primary/10"></div>
-                    </div>
-                    <div className="mt-6 h-6 w-32 rounded-md bg-primary/10 mb-4"></div>
-                    <div className="space-y-2">
-                      <div className="h-4 w-full rounded-md bg-primary/10"></div>
-                      <div className="h-4 w-5/6 rounded-md bg-primary/10"></div>
-                      <div className="h-4 w-4/6 rounded-md bg-primary/10"></div>
-                    </div>
-                    <div className="mt-6 h-6 w-28 rounded-md bg-primary/10 mb-4"></div>
-                    <div className="space-y-2">
-                      <div className="h-4 w-full rounded-md bg-primary/10"></div>
-                      <div className="h-4 w-5/6 rounded-md bg-primary/10"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <Image className="w-full h-full" width={500} height={500} src={"/cv.jpg"} alt="cv genius hero section photo">
+
+              </Image>
             </div>
           </div>
         </div>

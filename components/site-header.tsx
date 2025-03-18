@@ -5,6 +5,7 @@ import { useState } from "react"
 import { Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ModeToggle } from "@/components/mode-toggle"
+import Image from "next/image"
 
 export function SiteHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -14,7 +15,9 @@ export function SiteHeader() {
       <div className="container flex h-14 items-center">
         <div className="mr-4 flex">
           <Link href="/" className="flex items-center space-x-2">
-            <span className="font-bold text-lg">CV Genius</span>
+            <Image className="size-10" src={"/logo.png"} alt="cv genius logo" width={200} height={200}>
+
+            </Image>
           </Link>
         </div>
 

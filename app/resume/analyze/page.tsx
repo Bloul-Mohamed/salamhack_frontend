@@ -197,7 +197,7 @@ export default function AnalyzePage() {
       setShowResults(false)
       toast({
         title: "Analysis Failed",
-        description: errorMessage,
+        description: "The uploaded file does not appear to contain CV or resume content.",
         variant: "destructive",
       })
     } finally {

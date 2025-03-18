@@ -4,12 +4,12 @@ import type React from "react"
 
 import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
+import { z } from "zod"
 import {
   ChevronLeft,
   ChevronRight,
   Save,
   Download,
-  Eye,
   EyeOff,
   Sparkles,
   FileText,
@@ -17,7 +17,6 @@ import {
   GraduationCap,
   Award,
   Languages,
-  Settings,
   Upload,
   FileUp,
   Loader2,
@@ -26,17 +25,12 @@ import {
   ArrowUp,
   Menu,
   X,
-  CheckCircle,
-  PanelLeft,
-  PanelRight,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-import { Separator } from "@/components/ui/separator"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { cvService } from "@/services/api"
 import { toast } from "@/hooks/use-toast"
 import { useResumeStore } from "@/store/resume-store"
@@ -99,6 +93,38 @@ export default function ResumeBuilderPage() {
   })
 
   // Add these new state variables after the other useState declarations
+  const personalInfoSchema = z.object({
+    name: z.string().min(1, "Name is required"),
+    title: z.string().min(1, "Professional title is required"),
+    email: z.string().email("Invalid email address").min(1, "Email is required"),
+    phone: z.string().min(1, "Phone number is required"),
+    location: z.string().min(1, "Location is required"),
+    summary: z
+      .string()
+      .min(50, "Summary should be at least 50 characters")
+      .max(500, "Summary should not exceed 500 characters"),
+  })
+
+  const experienceSchema = z.object({
+    title: z.string().min(1, "Job title is required"),
+    company: z.string().min(1, "Company name is required"),
+    location: z.string().min(1, "Location is required"),
+    startDate: z.string().min(1, "Start date is required"),
+    endDate: z.string().min(1, "End date is required"),
+    description: z.string().min(1, "Description is required"),
+  })
+
+  const educationSchema = z.object({
+    degree: z.string().min(1, "Degree is required"),
+    school: z.string().min(1, "School name is required"),
+    location: z.string().min(1, "Location is required"),
+    startDate: z.string().min(1, "Start date is required"),
+    endDate: z.string().optional(),
+    description: z.string().optional(),
+  })
+
+  const [validationErrors, setValidationErrors] = useState<Record<string, string[]>>({})
+
   const [selectedColor, setSelectedColor] = useState("bg-blue-500")
   const [sectionOrder, setSectionOrder] = useState([
     "Professional Summary",
@@ -233,7 +259,6 @@ export default function ResumeBuilderPage() {
         description: "",
       },
       ...education,
-      
     ])
   }
 
@@ -331,7 +356,7 @@ export default function ResumeBuilderPage() {
         console.error("Error extracting resume data:", error)
         toast({
           title: "Import Failed",
-          description: "Failed to extract data from your resume. Please try again.",
+          description: "The uploaded file does not appear to contain CV or resume content.",
           variant: "destructive",
         })
       } finally {
@@ -346,8 +371,150 @@ export default function ResumeBuilderPage() {
     }
   }
 
+  const analyzeResume = async () => {
+    try {
+      // Validate personal info
+      const personalInfoResult = personalInfoSchema.safeParse(personalInfo)
+
+      if (!personalInfoResult.success) {
+        const errors = personalInfoResult.error.format()
+        setValidationErrors((prev) => ({
+          ...prev,
+          personalInfo: Object.values(errors)
+            // @ts-ignore
+            .filter((e) => e?._errors)
+            // @ts-ignore
+            .map((e) => e?._errors[0]),
+        }))
+
+        toast({
+          title: "Validation Error",
+          description: "Please fill in all required fields in Personal Information",
+          variant: "destructive",
+        })
+
+        setActiveTab("personal")
+        return
+      }
+
+
+
+      // Clear validation errors if validation passes
+      setValidationErrors({})
+
+      setIsAnalyzing(true)
+      const cvText = JSON.stringify({
+        personal_info: personalInfo,
+        experience: experiences,
+        education: education,
+        skills: skills,
+      })
+
+      // @ts-ignore
+      const response = await cvService.scoreCV(cvText)
+      setAnalysisResults(response.data)
+
+      // Get the score
+      const overallScore = response.data?.score?.overall || 0
+
+      // Determine color based on score
+      let scoreColor = "text-red-500"
+      let bgColor = "bg-blue-500"
+
+      if (overallScore >= 70) {
+        scoreColor = "text-green-500"
+        bgColor = "bg-green-500"
+      } else if (overallScore >= 40) {
+        scoreColor = "text-amber-500"
+        bgColor = "bg-blue-500"
+      }
+
+      // Show toast with score and custom OKLCH background
+      toast({
+        title: "Analysis Complete",
+        description: (
+          <div className="flex items-center">
+            <span>Your resume scored </span>
+            <span className={`text-lg font-bold mx-1 ${scoreColor}`}>{overallScore}/100</span>
+          </div>
+        ),
+        className: "border border-purple-500",
+        style: {
+          backgroundColor: "oklch(0.546,0.245,262.881)"
+        }
+      })
+
+      // Add score display to the UI
+      const scoreElement = document.createElement("div")
+      scoreElement.id = "resume-score-display"
+      scoreElement.className = `fixed bottom-6 left-6 ${bgColor}/10 dark:${bgColor}/20 rounded-lg p-4 shadow-lg flex items-center z-50 border ${overallScore >= 70 ? "border-green-500" : overallScore >= 40 ? "border-amber-500" : "border-red-500"}`
+
+      scoreElement.innerHTML = `
+        <div class="mr-3 ${scoreColor} text-3xl font-bold">${overallScore}</div>
+        <div>
+          <div class="font-medium">Resume Score</div>
+          <div class="text-sm text-muted-foreground">out of 100</div>
+        </div>
+      `
+
+      // Remove existing score display if any
+      const existingScore = document.getElementById("resume-score-display")
+      if (existingScore) {
+        existingScore.remove()
+      }
+
+      // Add to the document
+      document.body.appendChild(scoreElement)
+
+      // Remove after 5 seconds
+      setTimeout(() => {
+        const element = document.getElementById("resume-score-display")
+        if (element) {
+          element.remove()
+        }
+      }, 5000)
+    } catch (error) {
+      console.error("Error analyzing resume:", error)
+      toast({
+        title: "Error",
+        description: "Failed to analyze resume. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsAnalyzing(false)
+    }
+  }
+
   const generateResume = async () => {
     try {
+      // Validate personal info
+      const personalInfoResult = personalInfoSchema.safeParse(personalInfo)
+
+      if (!personalInfoResult.success) {
+        const errors = personalInfoResult.error.format()
+        setValidationErrors((prev) => ({
+          ...prev,
+          personalInfo: Object.values(errors)
+            // @ts-ignore
+            .filter((e) => e?._errors)
+            // @ts-ignore
+            .map((e) => e?._errors[0]),
+        }))
+
+        toast({
+          title: "Validation Error",
+          description: "Please fill in all required fields in Personal Information",
+          variant: "destructive",
+        })
+
+        setActiveTab("personal")
+        return
+      }
+
+
+      // Clear validation errors if validation passes
+      setValidationErrors({})
+
       setIsGenerating(true)
 
       // Format the data for the API
@@ -406,6 +573,7 @@ export default function ResumeBuilderPage() {
       toast({
         title: "Resume Generated",
         description: "Your resume has been successfully generated",
+        className: "bg-[oklch(0.546_0.245_262.881)]/10 border-purple-500",
       })
 
       // Toggle preview mode to show the result
@@ -544,83 +712,6 @@ export default function ResumeBuilderPage() {
     })
   }
 
-  const analyzeResume = async () => {
-    try {
-      setIsAnalyzing(true)
-      const cvText = JSON.stringify({
-        personal_info: personalInfo,
-        experience: experiences,
-        education: education,
-        skills: skills,
-      })
-
-      // @ts-ignore
-      const response = await cvService.scoreCV(cvText)
-      setAnalysisResults(response.data)
-
-      // Get the score
-      const overallScore = response.data?.score?.overall || 0
-
-      // Determine color based on score
-      let scoreColor = "text-red-500"
-      if (overallScore >= 70) {
-        scoreColor = "text-green-500"
-      } else if (overallScore >= 40) {
-        scoreColor = "text-amber-500"
-      }
-
-      // Show toast with score
-      toast({
-        title: "Analysis Complete",
-        description: (
-          <div className="flex items-center">
-            <span>Your resume scored </span>
-            <span className={`text-lg font-bold mx-1 ${scoreColor}`}>{overallScore}/100</span>
-          </div>
-        ),
-      })
-
-      // Add score display to the UI
-      const scoreElement = document.createElement("div")
-      scoreElement.id = "resume-score-display"
-      scoreElement.className = `fixed bottom-6 left-6 bg-white dark:bg-gray-800 rounded-lg p-4 shadow-lg flex items-center z-50 border ${overallScore >= 70 ? "border-green-500" : overallScore >= 40 ? "border-amber-500" : "border-red-500"}`
-
-      scoreElement.innerHTML = `
-        <div class="mr-3 ${scoreColor} text-3xl font-bold">${overallScore}</div>
-        <div>
-          <div class="font-medium">Resume Score</div>
-          <div class="text-sm text-muted-foreground">out of 100</div>
-        </div>
-      `
-
-      // Remove existing score display if any
-      const existingScore = document.getElementById("resume-score-display")
-      if (existingScore) {
-        existingScore.remove()
-      }
-
-      // Add to the document
-      document.body.appendChild(scoreElement)
-
-      // Remove after 5 seconds
-      setTimeout(() => {
-        const element = document.getElementById("resume-score-display")
-        if (element) {
-          element.remove()
-        }
-      }, 5000)
-    } catch (error) {
-      console.error("Error analyzing resume:", error)
-      toast({
-        title: "Error",
-        description: "Failed to analyze resume. Please try again.",
-        variant: "destructive",
-      })
-    } finally {
-      setIsAnalyzing(false)
-    }
-  }
-
   // Toggle sidebar collapse
   const toggleSidebar = () => {
     setSidebarCollapsed(!sidebarCollapsed)
@@ -637,29 +728,45 @@ export default function ResumeBuilderPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Full Name</Label>
+                <Label htmlFor="name" className="flex items-center">
+                  Full Name <span className="text-red-500 ml-1">*</span>
+                </Label>
                 <Input
                   id="name"
                   name="name"
                   placeholder="John Doe"
                   value={personalInfo.name}
                   onChange={handlePersonalInfoChange}
+                  className={validationErrors.personalInfo?.includes("Name is required") ? "border-red-500" : ""}
                 />
+                {validationErrors.personalInfo?.includes("Name is required") && (
+                  <p className="text-xs text-red-500">Name is required</p>
+                )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="title">Professional Title</Label>
+                <Label htmlFor="title" className="flex items-center">
+                  Professional Title <span className="text-red-500 ml-1">*</span>
+                </Label>
                 <Input
                   id="title"
                   name="title"
                   placeholder="Marketing Manager"
                   value={personalInfo.title}
                   onChange={handlePersonalInfoChange}
+                  className={
+                    validationErrors.personalInfo?.includes("Professional title is required") ? "border-red-500" : ""
+                  }
                 />
+                {validationErrors.personalInfo?.includes("Professional title is required") && (
+                  <p className="text-xs text-red-500">Professional title is required</p>
+                )}
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="flex items-center">
+                Email <span className="text-red-500 ml-1">*</span>
+              </Label>
               <Input
                 id="email"
                 name="email"
@@ -667,45 +774,84 @@ export default function ResumeBuilderPage() {
                 placeholder="john.doe@example.com"
                 value={personalInfo.email}
                 onChange={handlePersonalInfoChange}
+                className={
+                  validationErrors.personalInfo?.includes("Email is required") ||
+                  validationErrors.personalInfo?.includes("Invalid email address")
+                    ? "border-red-500"
+                    : ""
+                }
               />
+              {validationErrors.personalInfo?.includes("Email is required") && (
+                <p className="text-xs text-red-500">Email is required</p>
+              )}
+              {validationErrors.personalInfo?.includes("Invalid email address") && (
+                <p className="text-xs text-red-500">Invalid email address</p>
+              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="phone">Phone</Label>
+                <Label htmlFor="phone" className="flex items-center">
+                  Phone <span className="text-red-500 ml-1">*</span>
+                </Label>
                 <Input
                   id="phone"
                   name="phone"
                   placeholder="+1 (555) 123-4567"
                   value={personalInfo.phone}
                   onChange={handlePersonalInfoChange}
+                  className={
+                    validationErrors.personalInfo?.includes("Phone number is required") ? "border-red-500" : ""
+                  }
                 />
+                {validationErrors.personalInfo?.includes("Phone number is required") && (
+                  <p className="text-xs text-red-500">Phone number is required</p>
+                )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="location">Location</Label>
+                <Label htmlFor="location" className="flex items-center">
+                  Location <span className="text-red-500 ml-1">*</span>
+                </Label>
                 <Input
                   id="location"
                   name="location"
                   placeholder="New York, NY"
                   value={personalInfo.location}
                   onChange={handlePersonalInfoChange}
+                  className={validationErrors.personalInfo?.includes("Location is required") ? "border-red-500" : ""}
                 />
+                {validationErrors.personalInfo?.includes("Location is required") && (
+                  <p className="text-xs text-red-500">Location is required</p>
+                )}
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="summary">Professional Summary</Label>
+              <Label htmlFor="summary" className="flex items-center">
+                Professional Summary <span className="text-red-500 ml-1">*</span>
+              </Label>
               <Textarea
                 id="summary"
                 name="summary"
                 placeholder="Experienced marketing professional with a track record of developing successful campaigns..."
-                className="min-h-[120px]"
+                className={`min-h-[120px] ${
+                  validationErrors.personalInfo?.some((err) => err.includes("Summary")) ? "border-red-500" : ""
+                }`}
                 value={personalInfo.summary}
                 onChange={handlePersonalInfoChange}
               />
-              <p className="text-xs text-muted-foreground">
-                A brief 3-4 sentence overview of your professional background and key strengths.
-              </p>
+              {validationErrors.personalInfo?.some((err) => err.includes("Summary should be at least")) && (
+                <p className="text-xs text-red-500">Summary should be at least 50 characters</p>
+              )}
+              {validationErrors.personalInfo?.some((err) => err.includes("Summary should not exceed")) && (
+                <p className="text-xs text-red-500">Summary should not exceed 500 characters</p>
+              )}
+              <div className="flex justify-between">
+                <p className="text-xs text-muted-foreground">
+                  A brief 3-4 sentence overview of your professional background and key strengths.
+                </p>
+                <p className="text-xs text-muted-foreground">{personalInfo.summary.length}/500 characters</p>
+              </div>
             </div>
           </div>
         )
@@ -1030,140 +1176,61 @@ export default function ResumeBuilderPage() {
           </div>
         )
 
-      // case "languages":
-      //   return (
-      //     <div className="space-y-4">
-      //       <div className="flex justify-between items-center">
-      //         <h2 className="text-xl font-semibold">Languages</h2>
-      //         <Button
-      //           size="sm"
-      //           className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white"
-      //           onClick={() => addSkill("languages")}
-      //         >
-      //           Add Language
-      //         </Button>
-      //       </div>
-      //       <p className="text-sm text-muted-foreground">Add languages you speak and your proficiency level.</p>
+      case "languages":
+        return (
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold">Languages</h2>
+              <Button
+                size="sm"
+                className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white"
+                onClick={() => addSkill("languages")}
+              >
+                Add Language
+              </Button>
+            </div>
+            <p className="text-sm text-muted-foreground">Add languages you speak and your proficiency level.</p>
 
-      //       <div className="space-y-2">
-      //         {skills.languages.map((language, index) => (
-      //           <div key={index} className="flex items-center gap-2">
-      //             <Input
-      //               value={language}
-      //               onChange={(e) => handleSkillChange("languages", index, e.target.value)}
-      //               placeholder="e.g. English (Native)"
-      //             />
-      //             {skills.languages.length > 1 && (
-      //               <Button variant="ghost" size="sm" onClick={() => removeSkill("languages", index)}>
-      //                 ×
-      //               </Button>
-      //             )}
-      //           </div>
-      //         ))}
-      //       </div>
-      //     </div>
-      //   )
+            <div className="space-y-2">
+              {skills.languages.map((language, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <Input
+                    value={language}
+                    onChange={(e) => handleSkillChange("languages", index, e.target.value)}
+                    placeholder="e.g. English (Native)"
+                  />
+                  {skills.languages.length > 1 && (
+                    <Button variant="ghost" size="sm" onClick={() => removeSkill("languages", index)}>
+                      ×
+                    </Button>
+                  )}
+                </div>
+              ))}
+            </div>
 
-      // case "settings":
-      //   return (
-      //     <div className="space-y-4">
-      //       <h2 className="text-xl font-semibold">Resume Settings</h2>
-      //       <p className="text-sm text-muted-foreground">Customize the appearance and layout of your resume.</p>
-
-      //       <div className="space-y-4">
-      //         <div className="space-y-2">
-      //           <Label htmlFor="template">Template</Label>
-      //           <Select defaultValue="modern">
-      //             <SelectTrigger>
-      //               <SelectValue placeholder="Select template" />
-      //             </SelectTrigger>
-      //             <SelectContent>
-      //               <SelectItem value="modern">Modern</SelectItem>
-      //               <SelectItem value="classic">Classic</SelectItem>
-      //               <SelectItem value="creative">Creative</SelectItem>
-      //               <SelectItem value="professional">Professional</SelectItem>
-      //               <SelectItem value="minimal">Minimal</SelectItem>
-      //             </SelectContent>
-      //           </Select>
-      //         </div>
-      //         <div className="space-y-2">
-      //           <Label htmlFor="colorScheme">Color Scheme</Label>
-      //           <div className="flex gap-2">
-      //             {["bg-blue-500", "bg-green-500", "bg-purple-500", "bg-red-500", "bg-gray-500"].map((color, index) => (
-      //               <button
-      //                 key={index}
-      //                 className={`w-8 h-8 rounded-full ${color} ${selectedColor === color ? "ring-2 ring-offset-2 ring-primary" : ""}`}
-      //                 aria-label={`Color option ${index + 1}`}
-      //                 onClick={() => setSelectedColor(color)}
-      //               />
-      //             ))}
-      //           </div>
-      //           <p className="text-xs text-muted-foreground mt-1">
-      //             Selected color: {selectedColor.replace("bg-", "").replace("-500", "")}
-      //           </p>
-      //         </div>
-      //         <div className="space-y-2">
-      //           <Label htmlFor="fontSize">Font Size</Label>
-      //           <Select defaultValue="medium">
-      //             <SelectTrigger>
-      //               <SelectValue placeholder="Select font size" />
-      //             </SelectTrigger>
-      //             <SelectContent>
-      //               <SelectItem value="small">Small</SelectItem>
-      //               <SelectItem value="medium">Medium</SelectItem>
-      //               <SelectItem value="large">Large</SelectItem>
-      //             </SelectContent>
-      //           </Select>
-      //         </div>
-      //         <div className="space-y-2">
-      //           <Label htmlFor="spacing">Spacing</Label>
-      //           <Select defaultValue="comfortable">
-      //             <SelectTrigger>
-      //               <SelectValue placeholder="Select spacing" />
-      //             </SelectTrigger>
-      //             <SelectContent>
-      //               <SelectItem value="compact">Compact</SelectItem>
-      //               <SelectItem value="comfortable">Comfortable</SelectItem>
-      //               <SelectItem value="spacious">Spacious</SelectItem>
-      //             </SelectContent>
-      //           </Select>
-      //         </div>
-      //         <Separator />
-      //         <div className="space-y-2">
-      //           <Label htmlFor="sections">Section Order</Label>
-      //           <p className="text-sm text-muted-foreground">Use the arrows to reorder sections</p>
-      //           <div className="space-y-2 mt-2">
-      //             {sectionOrder.map((section, index) => (
-      //               <div key={index} className="flex items-center justify-between p-3 bg-muted rounded-md">
-      //                 <div className="flex items-center">
-      //                   <span className="text-muted-foreground mr-2">{index + 1}</span>
-      //                   <span>{section}</span>
-      //                 </div>
-      //                 <div className="flex items-center text-muted-foreground">
-      //                   <button
-      //                     className="p-1 hover:bg-background rounded"
-      //                     onClick={() => moveSection(index, "up")}
-      //                     disabled={index === 0}
-      //                     aria-label="Move up"
-      //                   >
-      //                     ↑
-      //                   </button>
-      //                   <button
-      //                     className="p-1 hover:bg-background rounded"
-      //                     onClick={() => moveSection(index, "down")}
-      //                     disabled={index === sectionOrder.length - 1}
-      //                     aria-label="Move down"
-      //                   >
-      //                     ↓
-      //                   </button>
-      //                 </div>
-      //               </div>
-      //             ))}
-      //           </div>
-      //         </div>
-      //       </div>
-      //     </div>
-      //   )
+            <div className="mt-4">
+              <p className="text-sm text-muted-foreground mb-2">Proficiency levels you can use:</p>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div className="flex items-center gap-1">
+                  <span className="w-3 h-3 rounded-full bg-green-500"></span>
+                  <span>Native / Bilingual</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span className="w-3 h-3 rounded-full bg-blue-500"></span>
+                  <span>Fluent</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span className="w-3 h-3 rounded-full bg-yellow-500"></span>
+                  <span>Intermediate</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span className="w-3 h-3 rounded-full bg-red-500"></span>
+                  <span>Basic</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )
 
       default:
         return null
@@ -1327,7 +1394,6 @@ export default function ResumeBuilderPage() {
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
-
             <Button
               variant="outline"
               size="sm"
@@ -1660,14 +1726,6 @@ export default function ResumeBuilderPage() {
           <ArrowUp className="h-5 w-5" />
         </Button>
       )}
-
-      {/* Success indicator when resume is generated */}
-      {/* {pdfUrl && !fullScreenPdf && (
-        <div className="fixed bottom-6 left-6 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 rounded-lg p-3 shadow-lg flex items-center z-50">
-          <CheckCircle className="h-5 w-5 mr-2" />
-          <span>Resume generated successfully!</span>
-        </div>
-      )} */}
     </div>
   )
 }
