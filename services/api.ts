@@ -1,13 +1,21 @@
 import axios from "axios"
 
-// Base API configuration
-const API_BASE_URL = "http://api.cvgenius.stepdevs.click:8000/api"
+// Base API configuration - now using relative URL for the proxy
+const API_BASE_URL = "/api/proxy"
 
 // Create axios instance with base configuration
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     "Content-Type": "application/json",
+  },
+  // Add params serializer to include the path parameter
+  paramsSerializer: (params) => {
+    const searchParams = new URLSearchParams()
+    for (const key in params) {
+      searchParams.append(key, params[key])
+    }
+    return searchParams.toString()
   },
 })
 
@@ -24,35 +32,61 @@ export const cvService = {
     const formData = new FormData()
     formData.append("cv_file", file)
 
-    return api.post("/cv/analyze-cv-file/", formData, {
+    return api.post("", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
+      },
+      params: {
+        path: "/cv/analyze-cv-file/",
       },
     })
   },
 
   // Analyze CV from text
   analyzeCV: async (cvText: string) => {
-    return api.post("/cv/analyze-cv/", { cv_text: cvText })
+    return api.post(
+      "",
+      { cv_text: cvText },
+      {
+        params: {
+          path: "/cv/analyze-cv/",
+        },
+      },
+    )
   },
 
   // Score CV
   scoreCV: async (cvText: File) => {
-    return api.post("/cv/score-cv/", { cv_text: cvText })
+    return api.post(
+      "",
+      { cv_text: cvText },
+      {
+        params: {
+          path: "/cv/score-cv/",
+        },
+      },
+    )
   },
 
   // Generate LaTeX CV
   generateLatexCV: async (cvData: any) => {
-    return api.post("/cv/generate-latex-cv/", cvData)
+    return api.post("", cvData, {
+      params: {
+        path: "/cv/generate-latex-cv/",
+      },
+    })
   },
 
   // Convert LaTeX to PDF
   latexToPdf: async (latexContent: string) => {
     return api.post(
-      "/cv/latex-to-pdf/",
+      "",
       { latex_content: latexContent },
       {
         responseType: "blob",
+        params: {
+          path: "/cv/latex-to-pdf/",
+        },
       },
     )
   },
@@ -60,10 +94,13 @@ export const cvService = {
   // Convert LaTeX to Word
   latexToWord: async (latexContent: string) => {
     return api.post(
-      "/cv/latex-to-word/",
+      "",
       { latex_content: latexContent },
       {
         responseType: "blob",
+        params: {
+          path: "/cv/latex-to-word/",
+        },
       },
     )
   },
@@ -72,9 +109,12 @@ export const cvService = {
     const formData = new FormData()
     formData.append("cv_file", file)
 
-    return api.post("/cv/extract-cv-data-from-file/", formData, {
+    return api.post("", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
+      },
+      params: {
+        path: "/cv/extract-cv-data-from-file/",
       },
     })
   },
@@ -84,27 +124,48 @@ export const cvService = {
 export const userService = {
   // Get all clients
   getClients: async () => {
-    return api.get("/users/clients/")
+    return api.get("", {
+      params: {
+        path: "/users/clients/",
+      },
+    })
   },
 
   // Get client by ID
   getClient: async (id: number) => {
-    return api.get(`/users/clients/${id}/`)
+    return api.get("", {
+      params: {
+        path: `/users/clients/${id}/`,
+      },
+    })
   },
 
   // Create client
   createClient: async (clientData: any) => {
-    return api.post("/users/clients/", clientData)
+    return api.post("", clientData, {
+      params: {
+        path: "/users/clients/",
+      },
+    })
   },
 
   // Update client
   updateClient: async (id: number, clientData: any) => {
-    return api.put(`/users/clients/${id}/`, clientData)
+    return api.put("", clientData, {
+      params: {
+        path: `/users/clients/${id}/`,
+      },
+    })
   },
 
   // Get client CVs
   getClientCVs: async (clientId: number) => {
-    return api.get(`/users/cvs/by_client/?client_id=${clientId}`)
+    return api.get("", {
+      params: {
+        path: "/users/cvs/by_client/",
+        client_id: clientId,
+      },
+    })
   },
 
   // Upload CV for client
@@ -113,9 +174,12 @@ export const userService = {
     formData.append("client", clientId.toString())
     formData.append("cv", file)
 
-    return api.post("/users/cvs/upload_cv/", formData, {
+    return api.post("", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
+      },
+      params: {
+        path: "/users/cvs/upload_cv/",
       },
     })
   },
@@ -125,24 +189,41 @@ export const userService = {
 export const jobService = {
   // Get all jobs
   getJobs: async () => {
-    return api.get("/pack/jobs/")
+    return api.get("", {
+      params: {
+        path: "/pack/jobs/",
+      },
+    })
   },
 
   // Get job by ID
   getJob: async (id: number) => {
-    return api.get(`/pack/jobs/${id}/`)
+    return api.get("", {
+      params: {
+        path: `/pack/jobs/${id}/`,
+      },
+    })
   },
 }
 
 export const planService = {
   // Get all plans
   getPlans: async () => {
-    return api.get("/pack/plans/")
+    return api.get("", {
+      params: {
+        path: "/pack/plans/",
+      },
+    })
   },
 
   // Get client plans
   getClientPlans: async (clientId: number) => {
-    return api.get(`/users/client-plans/by_client/?client_id=${clientId}`)
+    return api.get("", {
+      params: {
+        path: "/users/client-plans/by_client/",
+        client_id: clientId,
+      },
+    })
   },
 }
 
