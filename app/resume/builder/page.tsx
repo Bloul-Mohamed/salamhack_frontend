@@ -5,27 +5,7 @@ import type React from "react"
 import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { z } from "zod"
-import {
-  ChevronLeft,
-  ChevronRight,
-  Save,
-  Download,
-  EyeOff,
-  Sparkles,
-  FileText,
-  Briefcase,
-  GraduationCap,
-  Award,
-  Languages,
-  Upload,
-  FileUp,
-  Loader2,
-  Trash2,
-  FileCheck,
-  ArrowUp,
-  Menu,
-  X,
-} from "lucide-react"
+import { ChevronLeft, ChevronRight, Save, Download, EyeOff, Sparkles, FileText, Briefcase, GraduationCap, Award, Languages, Upload, FileUp, Loader2, Trash2, FileCheck, ArrowUp, Menu, X } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -35,6 +15,19 @@ import { cvService } from "@/services/api"
 import { toast } from "@/hooks/use-toast"
 import { useResumeStore } from "@/store/resume-store"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select"
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu"
 
 export default function ResumeBuilderPage() {
   const router = useRouter()
@@ -164,7 +157,11 @@ export default function ResumeBuilderPage() {
       const formData = mapExtractedDataToFormData()
 
       // Set form state from the mapped data
-      setPersonalInfo(formData.personalInfo)
+      setPersonalInfo({
+        ...formData.personalInfo,
+        // @ts-ignore
+        summary: resumeData.summary || "", // Ensure summary is properly set
+      })
       setExperiences(formData.experiences)
       setEducation(formData.education)
       setSkills(formData.skills)
@@ -337,12 +334,16 @@ export default function ResumeBuilderPage() {
         if (response.data) {
           // Store the extracted data in the Zustand store
           setResumeData(response.data)
-
+          console.log(response.data);
+          
           // Map the data to form fields
           const formData = useResumeStore.getState().mapExtractedDataToFormData()
 
           // Update form state
-          setPersonalInfo(formData.personalInfo)
+          setPersonalInfo({
+            ...formData.personalInfo,
+            summary: response.data?.summary,
+          })
           setExperiences(formData.experiences)
           setEducation(formData.education)
           setSkills(formData.skills)
@@ -562,8 +563,8 @@ export default function ResumeBuilderPage() {
       }
 
       // Clean up the LaTeX content if needed
-      if (latexContent.includes("```latex")) {
-        latexContent = latexContent.replace("```latex\n", "").replace("```", "")
+      if (latexContent.includes("\`\`\`latex")) {
+        latexContent = latexContent.replace("\`\`\`latex\n", "").replace("\`\`\`", "")
       }
 
       // Store in localStorage
@@ -717,6 +718,8 @@ export default function ResumeBuilderPage() {
     setSidebarCollapsed(!sidebarCollapsed)
   }
 
+  
+  
   // Render the form content based on active tab
   const renderFormContent = () => {
     switch (activeTab) {
@@ -830,16 +833,50 @@ export default function ResumeBuilderPage() {
               <Label htmlFor="summary" className="flex items-center">
                 Professional Summary <span className="text-red-500 ml-1">*</span>
               </Label>
-              <Textarea
-                id="summary"
-                name="summary"
-                placeholder="Experienced marketing professional with a track record of developing successful campaigns..."
-                className={`min-h-[120px] ${
-                  validationErrors.personalInfo?.some((err) => err.includes("Summary")) ? "border-red-500" : ""
-                }`}
-                value={personalInfo.summary}
-                onChange={handlePersonalInfoChange}
-              />
+              <div className="relative">
+                <Textarea
+                  id="summary"
+                  name="summary"
+                  placeholder="Experienced marketing professional with a track record of developing successful campaigns..."
+                  className={`min-h-[120px] ${
+                    validationErrors.personalInfo?.some((err) => err.includes("Summary")) ? "border-red-500" : ""
+                  }`}
+                  value={personalInfo.summary}
+                  onChange={handlePersonalInfoChange}
+                />
+                <div className="right-2 bottom-2 ml-auto mt-5">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button 
+                        size="sm" 
+                        className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white"
+                        disabled={isImprovingText['summary']}
+                      >
+                        {isImprovingText['summary'] ? (
+                          <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                        ) : (
+                          <Sparkles className="mr-2 h-3 w-3" />
+                        )}
+                        {isImprovingText['summary'] ? "Improving..." : "Improve with AI"}
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => improveTextWithAI('summary', personalInfo.summary, 'professional')}>
+                        Professional Style
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => improveTextWithAI('summary', personalInfo.summary, 'concise')}>
+                        Make Concise
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => improveTextWithAI('summary', personalInfo.summary, 'elaborate')}>
+                        Add Detail
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => improveTextWithAI('summary', personalInfo.summary, 'achievement')}>
+                        Highlight Achievements
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </div>
               {validationErrors.personalInfo?.some((err) => err.includes("Summary should be at least")) && (
                 <p className="text-xs text-red-500">Summary should be at least 50 characters</p>
               )}
@@ -930,13 +967,47 @@ export default function ResumeBuilderPage() {
 
                   <div className="space-y-2">
                     <Label htmlFor={`jobDescription-${index}`}>Description</Label>
-                    <Textarea
-                      id={`jobDescription-${index}`}
-                      placeholder="• Led digital marketing campaigns that increased conversion rates by 25%..."
-                      className="min-h-[120px]"
-                      value={experience.description}
-                      onChange={(e) => handleExperienceChange(index, "description", e.target.value)}
-                    />
+                    <div className="relative">
+                      <Textarea
+                        id={`jobDescription-${index}`}
+                        placeholder="• Led digital marketing campaigns that increased conversion rates by 25%..."
+                        className="min-h-[120px]"
+                        value={experience.description}
+                        onChange={(e) => handleExperienceChange(index, "description", e.target.value)}
+                      />
+                      <div className="absolute right-2 bottom-2">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button 
+                              size="sm" 
+                              className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white"
+                              disabled={isImprovingText[`experience-${index}`]}
+                            >
+                              {isImprovingText[`experience-${index}`] ? (
+                                <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                              ) : (
+                                <Sparkles className="mr-2 h-3 w-3" />
+                              )}
+                              {isImprovingText[`experience-${index}`] ? "Improving..." : "Improve with AI"}
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => improveTextWithAI(`experience-${index}`, experience.description, 'professional')}>
+                              Professional Style
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => improveTextWithAI(`experience-${index}`, experience.description, 'concise')}>
+                              Make Concise
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => improveTextWithAI(`experience-${index}`, experience.description, 'elaborate')}>
+                              Add Detail
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => improveTextWithAI(`experience-${index}`, experience.description, 'achievement')}>
+                              Highlight Achievements
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </div>
                   </div>
 
                   <div className="flex justify-end gap-2">
@@ -950,12 +1021,6 @@ export default function ResumeBuilderPage() {
                         Delete
                       </Button>
                     )}
-                    <Button
-                      size="sm"
-                      className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white"
-                    >
-                      <Sparkles className="mr-2 h-3 w-3" /> Improve with AI
-                    </Button>
                   </div>
                 </div>
               ))}
@@ -1037,15 +1102,49 @@ export default function ResumeBuilderPage() {
 
                   <div className="space-y-2">
                     <Label htmlFor={`eduDescription-${index}`}>Description (Optional)</Label>
-                    <Textarea
-                      id={`eduDescription-${index}`}
-                      placeholder="• GPA: 3.8/4.0
+                    <div className="relative">
+                      <Textarea
+                        id={`eduDescription-${index}`}
+                        placeholder="• GPA: 3.8/4.0
 • Relevant coursework: Digital Marketing, Consumer Behavior
 • Marketing Club President"
-                      className="min-h-[120px]"
-                      value={edu.description}
-                      onChange={(e) => handleEducationChange(index, "description", e.target.value)}
-                    />
+                        className="min-h-[120px]"
+                        value={edu.description}
+                        onChange={(e) => handleEducationChange(index, "description", e.target.value)}
+                      />
+                      <div className="absolute right-2 bottom-2">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button 
+                              size="sm" 
+                              className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white"
+                              disabled={isImprovingText[`education-${index}`]}
+                            >
+                              {isImprovingText[`education-${index}`] ? (
+                                <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                              ) : (
+                                <Sparkles className="mr-2 h-3 w-3" />
+                              )}
+                              {isImprovingText[`education-${index}`] ? "Improving..." : "Improve with AI"}
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => improveTextWithAI(`education-${index}`, edu.description || '', 'professional')}>
+                              Professional Style
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => improveTextWithAI(`education-${index}`, edu.description || '', 'concise')}>
+                              Make Concise
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => improveTextWithAI(`education-${index}`, edu.description || '', 'elaborate')}>
+                              Add Detail
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => improveTextWithAI(`education-${index}`, edu.description || '', 'achievement')}>
+                              Highlight Achievements
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </div>
                   </div>
 
                   <div className="flex justify-end gap-2">
@@ -1377,6 +1476,55 @@ export default function ResumeBuilderPage() {
     )
   }
 
+  const [selectedAiModel, setSelectedAiModel] = useState("gpt-4")
+  const [isImprovingText, setIsImprovingText] = useState<{[key: string]: boolean}>({})
+  const [improvementType, setImprovementType] = useState("professional")
+
+  const improveTextWithAI = async (fieldKey: string, text: string, type: string = improvementType) => {
+    if (!text || text.trim().length < 10) {
+      toast({
+        title: "Text too short",
+        description: "Please provide more text to improve (at least 10 characters).",
+        variant: "destructive"
+      })
+      return
+    }
+
+    try {
+      setIsImprovingText(prev => ({ ...prev, [fieldKey]: true }))
+      
+      const response = await cvService.improveText(text , type)
+      
+      const data = response.data
+      
+      // Update the appropriate field based on the fieldKey
+      if (fieldKey === 'summary') {
+        setPersonalInfo(prev => ({ ...prev, summary: data.improved_text }))
+      } else if (fieldKey.startsWith('experience-')) {
+        const index = parseInt(fieldKey.split('-')[1])
+        handleExperienceChange(index, 'description', data.improved_text)
+      } else if (fieldKey.startsWith('education-')) {
+        const index = parseInt(fieldKey.split('-')[1])
+        handleEducationChange(index, 'description', data.improved_text)
+      }
+      
+      toast({
+        title: "Text Improved",
+        description: "Your text has been enhanced with AI.",
+        className: "bg-[oklch(0.546_0.245_262.881)]/10 border-purple-500",
+      })
+    } catch (error) {
+      console.error('Error improving text:', error)
+      toast({
+        title: "Error",
+        description: "Failed to improve text. Please try again.",
+        variant: "destructive"
+      })
+    } finally {
+      setIsImprovingText(prev => ({ ...prev, [fieldKey]: false }))
+    }
+  }
+
   return (
     <div className="container py-6 space-y-6 max-w-7xl">
       {/* Fixed header with actions */}
@@ -1392,6 +1540,23 @@ export default function ResumeBuilderPage() {
               <h1 className="text-2xl font-bold tracking-tight">Resume Builder</h1>
               <p className="text-muted-foreground">Create and customize your professional resume</p>
             </div>
+          </div>
+          
+          {/* AI Model Selector */}
+          <div className="flex items-center gap-2 ml-auto mr-4">
+            <span className="text-sm font-medium">AI Model:</span>
+            <Select value={selectedAiModel} onValueChange={setSelectedAiModel}>
+              <SelectTrigger className="w-[180px] h-9 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+                <SelectValue placeholder="Select AI Model" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="gpt-4">ChatGPT (GPT-4)</SelectItem>
+                <SelectItem value="gpt-3.5">ChatGPT (GPT-3.5)</SelectItem>
+                <SelectItem value="gemini-pro">Google Gemini</SelectItem>
+                <SelectItem value="claude">Anthropic Claude</SelectItem>
+                <SelectItem value="deepseek">DeepSeek</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div className="flex flex-wrap gap-2">
             <Button
@@ -1729,4 +1894,3 @@ export default function ResumeBuilderPage() {
     </div>
   )
 }
-

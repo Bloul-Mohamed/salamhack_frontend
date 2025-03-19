@@ -108,6 +108,18 @@ export const cvService = {
       },
     )
   },
+  improveText: async (text_content: string , improvement_type: string) => {
+    return api.post(
+      "",
+      { text_content , improvement_type },
+      {
+        responseType: "blob",
+        params: {
+          path: "/cv/improve-text/",
+        },
+      },
+    )
+  },
 
   extractCvDataFromFile: async (file: File) => {
     const formData = new FormData()

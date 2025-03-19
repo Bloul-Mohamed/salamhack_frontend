@@ -151,23 +151,23 @@ export const useResumeStore = create<ResumeStore>()(
 
         // Map personal info
         const personalInfo = {
-          name: resumeData.personal_info.name || "",
-          title: resumeData.personal_info.title || "",
-          email: resumeData.personal_info.email || "",
-          phone: resumeData.personal_info.phone || "",
-          location: resumeData.personal_info.location || "",
-          summary: resumeData.personal_info.summary || "",
+          name: resumeData.personal_info?.name || "",
+          title: resumeData.personal_info?.title || "",
+          email: resumeData.personal_info?.email || "",
+          phone: resumeData.personal_info?.phone || "",
+          location: resumeData.personal_info?.location || "",
+          summary: resumeData.personal_info?.summary || "",
         }
 
         // Map experiences
-        const experiences = resumeData.experience.map((exp) => {
+        const experiences = resumeData.experience?.map((exp) => {
           // Parse dates if available
           let startDate = ""
           let endDate = ""
 
           if (exp.dates) {
             const datesParts = exp.dates.split(" - ")
-            if (datesParts.length === 2) {
+            if (datesParts?.length === 2) {
               startDate = datesParts[0]
               endDate = datesParts[1]
             }
@@ -184,7 +184,7 @@ export const useResumeStore = create<ResumeStore>()(
         })
 
         // If no experiences, add an empty one
-        if (experiences.length === 0) {
+        if (experiences?.length === 0) {
           experiences.push({
             title: "",
             company: "",
@@ -196,7 +196,7 @@ export const useResumeStore = create<ResumeStore>()(
         }
 
         // Map education
-        const education = resumeData.education.map((edu) => {
+        const education = resumeData.education?.map((edu) => {
           // Parse dates if available
           let startDate = ""
           let endDate = ""
