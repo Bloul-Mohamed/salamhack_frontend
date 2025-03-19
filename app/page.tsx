@@ -6,6 +6,7 @@ import { PricingSection } from "@/components/pricing-section"
 import Marquee3D from "@/components/marquee-3d"
 // import { ResumeScoreChecker } from "@/components/resume-score-checker"
 
+
 export default function HomePage() {
   return (
     <div className="flex flex-col items-center">

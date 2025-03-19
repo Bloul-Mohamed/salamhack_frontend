@@ -12,9 +12,11 @@ const inter = Inter({
 })
 
 export const metadata = {
-  title: "ResumeAI - AI-Powered Resume Builder",
+  title: "CV Genius - AI-Powered Resume Builder",
+  icons: {
+    icon: '/logo.svg', 
+  },
   description: "Create professional resumes with AI assistance",
-    generator: 'v0.dev'
 }
 
 export default function RootLayout({

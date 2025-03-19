@@ -15,7 +15,7 @@ export function SiteHeader() {
       <div className="container flex h-14 items-center">
         <div className="mr-4 flex">
           <Link href="/" className="flex items-center space-x-2">
-            <Image className="size-14" src={"/logo.svg"} alt="cv genius logo" width={200} height={200}>
+            <Image className="size-24" src={"/logo.svg"} alt="cv genius logo" width={200} height={200}>
 
             </Image>
           </Link>
