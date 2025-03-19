@@ -113,7 +113,6 @@ export const cvService = {
       "",
       { text_content , improvement_type },
       {
-        responseType: "blob",
         params: {
           path: "/cv/improve-text/",
         },

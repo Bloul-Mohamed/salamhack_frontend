@@ -872,8 +872,8 @@ export default function ResumeBuilderPage() {
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => improveTextWithAI('summary', personalInfo.summary, 'achievement')}>
                         Highlight Achievements
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
+                      </DropdownMenuItem >
+                    </DropdownMenuContent> 
                   </DropdownMenu>
                 </div>
               </div>
@@ -887,7 +887,7 @@ export default function ResumeBuilderPage() {
                 <p className="text-xs text-muted-foreground">
                   A brief 3-4 sentence overview of your professional background and key strengths.
                 </p>
-                <p className="text-xs text-muted-foreground">{personalInfo.summary.length}/500 characters</p>
+                <p className="text-xs text-muted-foreground">{personalInfo?.summary?.length}/500 characters</p>
               </div>
             </div>
           </div>
@@ -1481,7 +1481,7 @@ export default function ResumeBuilderPage() {
   const [improvementType, setImprovementType] = useState("professional")
 
   const improveTextWithAI = async (fieldKey: string, text: string, type: string = improvementType) => {
-    if (!text || text.trim().length < 10) {
+    if (!text || text?.trim().length < 10) {
       toast({
         title: "Text too short",
         description: "Please provide more text to improve (at least 10 characters).",
@@ -1493,9 +1493,12 @@ export default function ResumeBuilderPage() {
     try {
       setIsImprovingText(prev => ({ ...prev, [fieldKey]: true }))
       
+      console.log(text , type);
+      
       const response = await cvService.improveText(text , type)
       
       const data = response.data
+      console.log(data);
       
       // Update the appropriate field based on the fieldKey
       if (fieldKey === 'summary') {
