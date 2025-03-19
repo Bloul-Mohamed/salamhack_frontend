@@ -26,6 +26,7 @@ import { useRouter } from "next/navigation"
 import CircularScore from "@/components/circular-score"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 // Define types for analysis results
 interface AnalysisScore {
@@ -293,7 +294,7 @@ export default function AnalyzePage() {
       // Extract data from the file
       const response = await cvService.extractCvDataFromFile(selectedFile)
       console.log(response.data);
-      
+
       if (response.data) {
         // Store the extracted data in the Zustand store
         useResumeStore.getState().setResumeData(response.data)
@@ -368,6 +369,21 @@ export default function AnalyzePage() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Resume Analysis</h1>
           <p className="text-muted-foreground">Get detailed feedback on your resume</p>
+        </div>
+        <div className="flex items-center gap-2 ml-auto mr-4">
+          <span className="text-sm font-medium">AI Model:</span>
+          <Select value={"gemini-pro"} >
+            <SelectTrigger className="w-[180px] h-9 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+              <SelectValue placeholder="Select AI Model" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="gemini-pro">Google Gemini</SelectItem>
+              <SelectItem disabled value="gpt-4">ChatGPT (GPT-4)</SelectItem>
+              <SelectItem disabled value="gpt-3.5">ChatGPT (GPT-3.5)</SelectItem>
+              <SelectItem disabled value="claude">Anthropic Claude</SelectItem>
+              <SelectItem disabled value="deepseek">DeepSeek</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
@@ -626,8 +642,8 @@ export default function AnalyzePage() {
                         </CardHeader>
                         <CardContent>
                           {analysisResults?.analysis?.strengths &&
-                          Array.isArray(analysisResults.analysis.strengths) &&
-                          analysisResults.analysis.strengths.length > 0 ? (
+                            Array.isArray(analysisResults.analysis.strengths) &&
+                            analysisResults.analysis.strengths.length > 0 ? (
                             <ul className="space-y-4">
                               {analysisResults.analysis.strengths.map((strength, index) => (
                                 <li
@@ -659,8 +675,8 @@ export default function AnalyzePage() {
                         </CardHeader>
                         <CardContent>
                           {analysisResults?.analysis?.weaknesses &&
-                          Array.isArray(analysisResults.analysis.weaknesses) &&
-                          analysisResults.analysis.weaknesses.length > 0 ? (
+                            Array.isArray(analysisResults.analysis.weaknesses) &&
+                            analysisResults.analysis.weaknesses.length > 0 ? (
                             <ul className="space-y-4">
                               {analysisResults.analysis.weaknesses.map((weakness, index) => (
                                 <li
@@ -708,8 +724,8 @@ export default function AnalyzePage() {
                           </CardHeader>
                           <CardContent>
                             {analysisResults?.analysis?.industry_fit &&
-                            Array.isArray(analysisResults.analysis.industry_fit) &&
-                            analysisResults.analysis.industry_fit.length > 0 ? (
+                              Array.isArray(analysisResults.analysis.industry_fit) &&
+                              analysisResults.analysis.industry_fit.length > 0 ? (
                               <div className="space-y-4">
                                 <div className="flex flex-wrap gap-2">
                                   {analysisResults.analysis.industry_fit.map((industry, index) => {
@@ -821,8 +837,8 @@ export default function AnalyzePage() {
                         </CardHeader>
                         <CardContent>
                           {analysisResults?.analysis?.action_plan &&
-                          Array.isArray(analysisResults.analysis.action_plan) &&
-                          analysisResults.analysis.action_plan.length > 0 ? (
+                            Array.isArray(analysisResults.analysis.action_plan) &&
+                            analysisResults.analysis.action_plan.length > 0 ? (
                             <div className="space-y-4">
                               {analysisResults.analysis.action_plan.map((action, index) => (
                                 <div key={index} className="flex items-start gap-3 p-4 border rounded-lg">
@@ -1095,8 +1111,8 @@ export default function AnalyzePage() {
                         </CardHeader>
                         <CardContent>
                           {analysisResults?.analysis?.strengths &&
-                          Array.isArray(analysisResults.analysis.strengths) &&
-                          analysisResults.analysis.strengths.length > 0 ? (
+                            Array.isArray(analysisResults.analysis.strengths) &&
+                            analysisResults.analysis.strengths.length > 0 ? (
                             <ul className="space-y-4">
                               {analysisResults.analysis.strengths.map((strength, index) => (
                                 <li
@@ -1128,8 +1144,8 @@ export default function AnalyzePage() {
                         </CardHeader>
                         <CardContent>
                           {analysisResults?.analysis?.weaknesses &&
-                          Array.isArray(analysisResults.analysis.weaknesses) &&
-                          analysisResults.analysis.weaknesses.length > 0 ? (
+                            Array.isArray(analysisResults.analysis.weaknesses) &&
+                            analysisResults.analysis.weaknesses.length > 0 ? (
                             <ul className="space-y-4">
                               {analysisResults.analysis.weaknesses.map((weakness, index) => (
                                 <li
@@ -1177,8 +1193,8 @@ export default function AnalyzePage() {
                           </CardHeader>
                           <CardContent>
                             {analysisResults?.analysis?.industry_fit &&
-                            Array.isArray(analysisResults.analysis.industry_fit) &&
-                            analysisResults.analysis.industry_fit.length > 0 ? (
+                              Array.isArray(analysisResults.analysis.industry_fit) &&
+                              analysisResults.analysis.industry_fit.length > 0 ? (
                               <div className="space-y-4">
                                 <div className="flex flex-wrap gap-2">
                                   {analysisResults.analysis.industry_fit.map((industry, index) => {
@@ -1290,8 +1306,8 @@ export default function AnalyzePage() {
                         </CardHeader>
                         <CardContent>
                           {analysisResults?.analysis?.action_plan &&
-                          Array.isArray(analysisResults.analysis.action_plan) &&
-                          analysisResults.analysis.action_plan.length > 0 ? (
+                            Array.isArray(analysisResults.analysis.action_plan) &&
+                            analysisResults.analysis.action_plan.length > 0 ? (
                             <div className="space-y-4">
                               {analysisResults.analysis.action_plan.map((action, index) => (
                                 <div key={index} className="flex items-start gap-3 p-4 border rounded-lg">

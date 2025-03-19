@@ -864,15 +864,15 @@ export default function ResumeBuilderPage() {
                       <DropdownMenuItem onClick={() => improveTextWithAI('summary', personalInfo.summary, 'professional')}>
                         Professional Style
                       </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => improveTextWithAI('summary', personalInfo.summary, 'academic')}>
+                        Make it Academic
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => improveTextWithAI('summary', personalInfo.summary, 'creative')}>
+                        Creative
+                      </DropdownMenuItem >
                       <DropdownMenuItem onClick={() => improveTextWithAI('summary', personalInfo.summary, 'concise')}>
                         Make Concise
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => improveTextWithAI('summary', personalInfo.summary, 'elaborate')}>
-                        Add Detail
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => improveTextWithAI('summary', personalInfo.summary, 'achievement')}>
-                        Highlight Achievements
-                      </DropdownMenuItem >
                     </DropdownMenuContent> 
                   </DropdownMenu>
                 </div>
@@ -883,12 +883,7 @@ export default function ResumeBuilderPage() {
               {validationErrors.personalInfo?.some((err) => err.includes("Summary should not exceed")) && (
                 <p className="text-xs text-red-500">Summary should not exceed 500 characters</p>
               )}
-              <div className="flex justify-between">
-                <p className="text-xs text-muted-foreground">
-                  A brief 3-4 sentence overview of your professional background and key strengths.
-                </p>
-                <p className="text-xs text-muted-foreground">{personalInfo?.summary?.length}/500 characters</p>
-              </div>
+
             </div>
           </div>
         )
@@ -975,7 +970,7 @@ export default function ResumeBuilderPage() {
                         value={experience.description}
                         onChange={(e) => handleExperienceChange(index, "description", e.target.value)}
                       />
-                      <div className="absolute right-2 bottom-2">
+                      <div className="mt-5">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button 
@@ -995,14 +990,14 @@ export default function ResumeBuilderPage() {
                             <DropdownMenuItem onClick={() => improveTextWithAI(`experience-${index}`, experience.description, 'professional')}>
                               Professional Style
                             </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => improveTextWithAI(`experience-${index}`, experience.description, 'academic')}>
+                              Academic
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => improveTextWithAI(`experience-${index}`, experience.description, 'creative')}>
+                              Creative
+                            </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => improveTextWithAI(`experience-${index}`, experience.description, 'concise')}>
-                              Make Concise
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => improveTextWithAI(`experience-${index}`, experience.description, 'elaborate')}>
-                              Add Detail
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => improveTextWithAI(`experience-${index}`, experience.description, 'achievement')}>
-                              Highlight Achievements
+                              Concise
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -1112,7 +1107,7 @@ export default function ResumeBuilderPage() {
                         value={edu.description}
                         onChange={(e) => handleEducationChange(index, "description", e.target.value)}
                       />
-                      <div className="absolute right-2 bottom-2">
+                      <div className="mt-5">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button 
@@ -1132,14 +1127,14 @@ export default function ResumeBuilderPage() {
                             <DropdownMenuItem onClick={() => improveTextWithAI(`education-${index}`, edu.description || '', 'professional')}>
                               Professional Style
                             </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => improveTextWithAI(`education-${index}`, edu.description || '', 'academic')}>
+                              Academic
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => improveTextWithAI(`education-${index}`, edu.description || '', 'creative')}>
+                              Creative
+                            </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => improveTextWithAI(`education-${index}`, edu.description || '', 'concise')}>
-                              Make Concise
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => improveTextWithAI(`education-${index}`, edu.description || '', 'elaborate')}>
-                              Add Detail
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => improveTextWithAI(`education-${index}`, edu.description || '', 'achievement')}>
-                              Highlight Achievements
+                              Concise
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -1306,28 +1301,6 @@ export default function ResumeBuilderPage() {
                 </div>
               ))}
             </div>
-
-            <div className="mt-4">
-              <p className="text-sm text-muted-foreground mb-2">Proficiency levels you can use:</p>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div className="flex items-center gap-1">
-                  <span className="w-3 h-3 rounded-full bg-green-500"></span>
-                  <span>Native / Bilingual</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <span className="w-3 h-3 rounded-full bg-blue-500"></span>
-                  <span>Fluent</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <span className="w-3 h-3 rounded-full bg-yellow-500"></span>
-                  <span>Intermediate</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <span className="w-3 h-3 rounded-full bg-red-500"></span>
-                  <span>Basic</span>
-                </div>
-              </div>
-            </div>
           </div>
         )
 
@@ -1481,24 +1454,16 @@ export default function ResumeBuilderPage() {
   const [improvementType, setImprovementType] = useState("professional")
 
   const improveTextWithAI = async (fieldKey: string, text: string, type: string = improvementType) => {
-    if (!text || text?.trim().length < 10) {
-      toast({
-        title: "Text too short",
-        description: "Please provide more text to improve (at least 10 characters).",
-        variant: "destructive"
-      })
-      return
-    }
+  
+    console.log(text , type);
 
     try {
       setIsImprovingText(prev => ({ ...prev, [fieldKey]: true }))
       
-      console.log(text , type);
       
       const response = await cvService.improveText(text , type)
       
       const data = response.data
-      console.log(data);
       
       // Update the appropriate field based on the fieldKey
       if (fieldKey === 'summary') {
@@ -1548,16 +1513,16 @@ export default function ResumeBuilderPage() {
           {/* AI Model Selector */}
           <div className="flex items-center gap-2 ml-auto mr-4">
             <span className="text-sm font-medium">AI Model:</span>
-            <Select value={selectedAiModel} onValueChange={setSelectedAiModel}>
+            <Select value={"gemini-pro"} onValueChange={setSelectedAiModel}>
               <SelectTrigger className="w-[180px] h-9 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
                 <SelectValue placeholder="Select AI Model" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="gpt-4">ChatGPT (GPT-4)</SelectItem>
-                <SelectItem value="gpt-3.5">ChatGPT (GPT-3.5)</SelectItem>
                 <SelectItem value="gemini-pro">Google Gemini</SelectItem>
-                <SelectItem value="claude">Anthropic Claude</SelectItem>
-                <SelectItem value="deepseek">DeepSeek</SelectItem>
+                <SelectItem disabled value="gpt-4">ChatGPT (GPT-4)</SelectItem>
+                <SelectItem disabled value="gpt-3.5">ChatGPT (GPT-3.5)</SelectItem>
+                <SelectItem disabled value="claude">Anthropic Claude</SelectItem>
+                <SelectItem disabled value="deepseek">DeepSeek</SelectItem>
               </SelectContent>
             </Select>
           </div>

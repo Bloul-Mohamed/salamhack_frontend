@@ -6,8 +6,25 @@ import Image from "next/image";
 
 export function OrbitingCirclesDemo() {
   return (
-    <div className="flex h-[500px] w-full flex-col items-center justify-center overflow-hidden opacity-20">
+    <div className="flex h-[500px] w-full flex-col items-center justify-center overflow-hidden opacity-35">
+      <OrbitingCircles iconSize={50} radius={500} speed={0.5}>
+        <Icons.facebook />
+        <Icons.apple />
+        <Icons.google />
+        <Icons.netflix />
+        <Icons.amazon />
+        <Icons.facebook />
+        <Icons.apple />
+        <Icons.google />
+        <Icons.netflix />
+        <Icons.amazon />
+      </OrbitingCircles>
       <OrbitingCircles iconSize={50} radius={300} speed={0.5}>
+        <Icons.facebook />
+        <Icons.apple />
+        <Icons.google />
+        <Icons.netflix />
+        <Icons.amazon />
         <Icons.facebook />
         <Icons.apple />
         <Icons.google />
@@ -20,8 +37,18 @@ export function OrbitingCirclesDemo() {
         <Icons.google />
         <Icons.netflix />
         <Icons.amazon />
+        <Icons.facebook />
+        <Icons.apple />
+        <Icons.google />
+        <Icons.netflix />
+        <Icons.amazon />
       </OrbitingCircles>
       <OrbitingCircles iconSize={30} radius={100} reverse speed={2}>
+        <Icons.facebook />
+        <Icons.apple />
+        <Icons.google />
+        <Icons.netflix />
+        <Icons.amazon />
         <Icons.facebook />
         <Icons.apple />
         <Icons.google />
