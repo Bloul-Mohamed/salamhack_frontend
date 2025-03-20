@@ -5,7 +5,27 @@ import type React from "react"
 import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { z } from "zod"
-import { ChevronLeft, ChevronRight, Save, Download, EyeOff, Sparkles, FileText, Briefcase, GraduationCap, Award, Languages, Upload, FileUp, Loader2, Trash2, FileCheck, ArrowUp, Menu, X } from 'lucide-react'
+import {
+  ChevronLeft,
+  ChevronRight,
+  Save,
+  Download,
+  EyeOff,
+  Sparkles,
+  FileText,
+  Briefcase,
+  GraduationCap,
+  Award,
+  Languages,
+  Upload,
+  FileUp,
+  Loader2,
+  Trash2,
+  FileCheck,
+  ArrowUp,
+  Menu,
+  X,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -15,19 +35,8 @@ import { cvService } from "@/services/api"
 import { toast } from "@/hooks/use-toast"
 import { useResumeStore } from "@/store/resume-store"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from "@/components/ui/select"
-import { 
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
 export default function ResumeBuilderPage() {
   const router = useRouter()
@@ -54,6 +63,7 @@ export default function ResumeBuilderPage() {
     phone: "",
     location: "",
     summary: "",
+    customLinks: [{ platform: "", url: "" }],
   })
 
   const [experiences, setExperiences] = useState([
@@ -92,10 +102,7 @@ export default function ResumeBuilderPage() {
     email: z.string().email("Invalid email address").min(1, "Email is required"),
     phone: z.string().min(1, "Phone number is required"),
     location: z.string().min(1, "Location is required"),
-    summary: z
-      .string()
-      .min(50, "Summary should be at least 50 characters")
-      .max(500, "Summary should not exceed 500 characters"),
+    summary: z.string().min(50, "Summary should be at least 50 characters"),
   })
 
   const experienceSchema = z.object({
@@ -334,8 +341,8 @@ export default function ResumeBuilderPage() {
         if (response.data) {
           // Store the extracted data in the Zustand store
           setResumeData(response.data)
-          console.log(response.data);
-          
+          console.log(response.data)
+
           // Map the data to form fields
           const formData = useResumeStore.getState().mapExtractedDataToFormData()
 
@@ -398,8 +405,6 @@ export default function ResumeBuilderPage() {
         return
       }
 
-
-
       // Clear validation errors if validation passes
       setValidationErrors({})
 
@@ -441,39 +446,9 @@ export default function ResumeBuilderPage() {
         ),
         className: "border border-purple-500",
         style: {
-          backgroundColor: "oklch(0.546,0.245,262.881)"
-        }
-      })
-
-      // Add score display to the UI
-      const scoreElement = document.createElement("div")
-      scoreElement.id = "resume-score-display"
-      scoreElement.className = `fixed bottom-6 left-6 ${bgColor}/10 dark:${bgColor}/20 rounded-lg p-4 shadow-lg flex items-center z-50 border ${overallScore >= 70 ? "border-green-500" : overallScore >= 40 ? "border-amber-500" : "border-red-500"}`
-
-      scoreElement.innerHTML = `
-        <div class="mr-3 ${scoreColor} text-3xl font-bold">${overallScore}</div>
-        <div>
-          <div class="font-medium">Resume Score</div>
-          <div class="text-sm text-muted-foreground">out of 100</div>
-        </div>
-      `
-
-      // Remove existing score display if any
-      const existingScore = document.getElementById("resume-score-display")
-      if (existingScore) {
-        existingScore.remove()
-      }
-
-      // Add to the document
-      document.body.appendChild(scoreElement)
-
-      // Remove after 5 seconds
-      setTimeout(() => {
-        const element = document.getElementById("resume-score-display")
-        if (element) {
-          element.remove()
-        }
-      }, 5000)
+          backgroundColor: "oklch(0.546,0.245,262.881)",
+        },
+      })      
     } catch (error) {
       console.error("Error analyzing resume:", error)
       toast({
@@ -512,13 +487,13 @@ export default function ResumeBuilderPage() {
         return
       }
 
-
       // Clear validation errors if validation passes
       setValidationErrors({})
 
       setIsGenerating(true)
 
       // Format the data for the API
+      
       const cvData = {
         personal_info: {
           name: personalInfo.name,
@@ -526,6 +501,15 @@ export default function ResumeBuilderPage() {
           phone: personalInfo.phone,
           location: personalInfo.location,
           title: personalInfo.title,
+          // ...personalInfo.customLinks?.reduce(
+          //   (acc, link) => {
+          //     if (link.platform && link.url) {
+          //       acc[link.platform.toLowerCase()] = link.url
+          //     }
+          //     return acc
+          //   },
+          //   {} as Record<string, string>,
+          // )
         },
         summary: personalInfo.summary,
         experience: experiences.map((exp) => ({
@@ -550,9 +534,13 @@ export default function ResumeBuilderPage() {
         },
         sections: sectionOrder,
       }
+      
 
       // Call the API to generate LaTeX
       const response = await cvService.generateLatexCV(cvData)
+      console.log(cvData);
+      
+console.log(response.data);
 
       // Handle the response correctly based on the API structure
       let latexContent = ""
@@ -563,8 +551,8 @@ export default function ResumeBuilderPage() {
       }
 
       // Clean up the LaTeX content if needed
-      if (latexContent.includes("\`\`\`latex")) {
-        latexContent = latexContent.replace("\`\`\`latex\n", "").replace("\`\`\`", "")
+      if (latexContent.includes("```latex")) {
+        latexContent = latexContent.replace("```latex\n", "").replace("```", "")
       }
 
       // Store in localStorage
@@ -658,6 +646,29 @@ export default function ResumeBuilderPage() {
     document.body.removeChild(a)
   }
 
+  const handleCustomLinkChange = (index: number, field: string, value: string) => {
+    const newLinks = [...personalInfo.customLinks]
+    newLinks[index] = { ...newLinks[index], [field]: value }
+    setPersonalInfo((prev) => ({ ...prev, customLinks: newLinks }))
+
+    // Ensure personalInfo.customLinks is an array
+    console.log(Array.isArray(personalInfo.customLinks)) // Should log true
+  }
+
+  const addCustomLink = () => {
+    setPersonalInfo((prev) => ({
+      ...prev,
+      customLinks: [...(prev?.customLinks || []), { platform: "", url: "" }],
+    }))
+  }
+
+  const removeCustomLink = (index: number) => {
+    if (personalInfo.customLinks.length > 1) {
+      const newLinks = personalInfo.customLinks.filter((_, i) => i !== index)
+      setPersonalInfo((prev) => ({ ...prev, customLinks: newLinks }))
+    }
+  }
+
   const clearAllData = () => {
     // Clear Zustand store
     clearResumeData()
@@ -670,6 +681,7 @@ export default function ResumeBuilderPage() {
       phone: "",
       location: "",
       summary: "",
+      customLinks: [{ platform: "", url: "" }],
     })
 
     setExperiences([
@@ -718,8 +730,6 @@ export default function ResumeBuilderPage() {
     setSidebarCollapsed(!sidebarCollapsed)
   }
 
-  
-  
   // Render the form content based on active tab
   const renderFormContent = () => {
     switch (activeTab) {
@@ -847,33 +857,35 @@ export default function ResumeBuilderPage() {
                 <div className="right-2 bottom-2 ml-auto mt-5">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button 
-                        size="sm" 
+                      <Button
+                        size="sm"
                         className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white"
-                        disabled={isImprovingText['summary']}
+                        disabled={isImprovingText["summary"]}
                       >
-                        {isImprovingText['summary'] ? (
+                        {isImprovingText["summary"] ? (
                           <Loader2 className="mr-2 h-3 w-3 animate-spin" />
                         ) : (
                           <Sparkles className="mr-2 h-3 w-3" />
                         )}
-                        {isImprovingText['summary'] ? "Improving..." : "Improve with AI"}
+                        {isImprovingText["summary"] ? "Improving..." : "Improve with AI"}
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => improveTextWithAI('summary', personalInfo.summary, 'professional')}>
+                      <DropdownMenuItem
+                        onClick={() => improveTextWithAI("summary", personalInfo.summary, "professional")}
+                      >
                         Professional Style
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => improveTextWithAI('summary', personalInfo.summary, 'academic')}>
+                      <DropdownMenuItem onClick={() => improveTextWithAI("summary", personalInfo.summary, "academic")}>
                         Make it Academic
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => improveTextWithAI('summary', personalInfo.summary, 'creative')}>
+                      <DropdownMenuItem onClick={() => improveTextWithAI("summary", personalInfo.summary, "creative")}>
                         Creative
-                      </DropdownMenuItem >
-                      <DropdownMenuItem onClick={() => improveTextWithAI('summary', personalInfo.summary, 'concise')}>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => improveTextWithAI("summary", personalInfo.summary, "concise")}>
                         Make Concise
                       </DropdownMenuItem>
-                    </DropdownMenuContent> 
+                    </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
               </div>
@@ -883,7 +895,47 @@ export default function ResumeBuilderPage() {
               {validationErrors.personalInfo?.some((err) => err.includes("Summary should not exceed")) && (
                 <p className="text-xs text-red-500">Summary should not exceed 500 characters</p>
               )}
-
+            </div>
+            <div className="space-y-4 mt-4">
+              <div className="flex justify-between items-center">
+                <h3 className="text-md font-medium">Social Links</h3>
+                <Button
+                  size="sm"
+                  className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white"
+                  onClick={addCustomLink}
+                >
+                  Add Link
+                </Button>
+              </div>
+              <div className="space-y-4">
+                {personalInfo.customLinks?.map((link, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <div className="flex-1">
+                      <Input
+                        placeholder="Platform (e.g., LinkedIn, GitHub)"
+                        value={link.platform}
+                        onChange={(e) => handleCustomLinkChange(index, "platform", e.target.value)}
+                        className="mb-2"
+                      />
+                      <Input
+                        placeholder="URL (e.g., https://linkedin.com/in/yourprofile)"
+                        value={link.url}
+                        onChange={(e) => handleCustomLinkChange(index, "url", e.target.value)}
+                      />
+                    </div>
+                    {personalInfo.customLinks.length > 1 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeCustomLink(index)}
+                        className="h-full text-red-500 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         )
@@ -973,8 +1025,8 @@ export default function ResumeBuilderPage() {
                       <div className="mt-5">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button 
-                              size="sm" 
+                            <Button
+                              size="sm"
                               className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white"
                               disabled={isImprovingText[`experience-${index}`]}
                             >
@@ -987,16 +1039,32 @@ export default function ResumeBuilderPage() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => improveTextWithAI(`experience-${index}`, experience.description, 'professional')}>
+                            <DropdownMenuItem
+                              onClick={() =>
+                                improveTextWithAI(`experience-${index}`, experience?.description[0], "professional")
+                              }
+                            >
                               Professional Style
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => improveTextWithAI(`experience-${index}`, experience.description, 'academic')}>
+                            <DropdownMenuItem
+                              onClick={() =>
+                                improveTextWithAI(`experience-${index}`, experience?.description[0], "academic")
+                              }
+                            >
                               Academic
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => improveTextWithAI(`experience-${index}`, experience.description, 'creative')}>
+                            <DropdownMenuItem
+                              onClick={() =>
+                                improveTextWithAI(`experience-${index}`, experience?.description[0], "creative")
+                              }
+                            >
                               Creative
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => improveTextWithAI(`experience-${index}`, experience.description, 'concise')}>
+                            <DropdownMenuItem
+                              onClick={() =>
+                                improveTextWithAI(`experience-${index}`, experience?.description[0], "concise")
+                              }
+                            >
                               Concise
                             </DropdownMenuItem>
                           </DropdownMenuContent>
@@ -1110,8 +1178,8 @@ export default function ResumeBuilderPage() {
                       <div className="mt-5">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button 
-                              size="sm" 
+                            <Button
+                              size="sm"
                               className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white"
                               disabled={isImprovingText[`education-${index}`]}
                             >
@@ -1124,16 +1192,26 @@ export default function ResumeBuilderPage() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => improveTextWithAI(`education-${index}`, edu.description || '', 'professional')}>
+                            <DropdownMenuItem
+                              onClick={() =>
+                                improveTextWithAI(`education-${index}`, edu.description || "", "professional")
+                              }
+                            >
                               Professional Style
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => improveTextWithAI(`education-${index}`, edu.description || '', 'academic')}>
+                            <DropdownMenuItem
+                              onClick={() => improveTextWithAI(`education-${index}`, edu.description || "", "academic")}
+                            >
                               Academic
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => improveTextWithAI(`education-${index}`, edu.description || '', 'creative')}>
+                            <DropdownMenuItem
+                              onClick={() => improveTextWithAI(`education-${index}`, edu.description || "", "creative")}
+                            >
                               Creative
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => improveTextWithAI(`education-${index}`, edu.description || '', 'concise')}>
+                            <DropdownMenuItem
+                              onClick={() => improveTextWithAI(`education-${index}`, edu.description || "", "concise")}
+                            >
                               Concise
                             </DropdownMenuItem>
                           </DropdownMenuContent>
@@ -1323,6 +1401,16 @@ export default function ResumeBuilderPage() {
               {personalInfo.phone && <span>• {personalInfo.phone}</span>}
               {personalInfo.location && <span>• {personalInfo.location}</span>}
             </div>
+            {/* Social links */}
+            <div className="flex flex-wrap justify-center gap-3 mt-2 text-sm text-blue-600">
+              {personalInfo.customLinks?.map((link, i) =>
+                link.platform && link.url ? (
+                  <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                    {link.platform}
+                  </a>
+                ) : null,
+              )}
+            </div>
           </div>
 
           {/* Summary section */}
@@ -1337,7 +1425,7 @@ export default function ResumeBuilderPage() {
           {experiences.some((exp) => exp.title || exp.company) && (
             <div>
               <h2 className="text-xl font-semibold text-gray-800 mb-2">Experience</h2>
-              {experiences.map((exp, i) =>
+              {experiences?.map((exp, i) =>
                 exp.title || exp.company ? (
                   <div key={i} className="mb-4">
                     <div className="flex justify-between items-baseline">
@@ -1353,7 +1441,7 @@ export default function ResumeBuilderPage() {
                     {exp.description && (
                       <div className="mt-2 text-gray-700">
                         {typeof exp.description === "string" ? (
-                          exp.description.split("\n").map((item, idx) => (
+                          exp.description.split("\n")?.map((item, idx) => (
                             <div key={idx} className="flex items-start">
                               <span className="mr-2">○</span>
                               <p>{item}</p>
@@ -1450,46 +1538,71 @@ export default function ResumeBuilderPage() {
   }
 
   const [selectedAiModel, setSelectedAiModel] = useState("gpt-4")
-  const [isImprovingText, setIsImprovingText] = useState<{[key: string]: boolean}>({})
+  const [isImprovingText, setIsImprovingText] = useState<{ [key: string]: boolean }>({})
   const [improvementType, setImprovementType] = useState("professional")
 
   const improveTextWithAI = async (fieldKey: string, text: string, type: string = improvementType) => {
-  
-    console.log(text , type);
+    console.log(text, type)
+
+    if (!text || text?.trim() === "") {
+      toast({
+        title: "Error",
+        description: "Please enter some text to improve",
+        variant: "destructive",
+      })
+      return
+    }
 
     try {
-      setIsImprovingText(prev => ({ ...prev, [fieldKey]: true }))
-      
-      
-      const response = await cvService.improveText(text , type)
-      
+      setIsImprovingText((prev) => ({ ...prev, [fieldKey]: true }))
+
+      const response = await cvService.improveText(text, type)
+
       const data = response.data
-      
-      // Update the appropriate field based on the fieldKey
-      if (fieldKey === 'summary') {
-        setPersonalInfo(prev => ({ ...prev, summary: data.improved_text }))
-      } else if (fieldKey.startsWith('experience-')) {
-        const index = parseInt(fieldKey.split('-')[1])
-        handleExperienceChange(index, 'description', data.improved_text)
-      } else if (fieldKey.startsWith('education-')) {
-        const index = parseInt(fieldKey.split('-')[1])
-        handleEducationChange(index, 'description', data.improved_text)
+      console.log(data)
+
+      if (data) {
+        if (fieldKey === "summary") {
+          setPersonalInfo((prev) => ({
+            ...prev,
+            summary: Array.isArray(data) ? data[0].improved_text : data.improved_text,
+          }))
+        } else if (fieldKey.startsWith("experience-")) {
+          const index = Number.parseInt(fieldKey.split("-")[1])
+          const newExperiences = [...experiences]
+
+          newExperiences[index] = {
+            ...newExperiences[index],
+            description: Array.isArray(data) ? data[0].improved_text : data.improved_text,
+          }
+          setExperiences(newExperiences)
+        } else if (fieldKey.startsWith("education-")) {
+          const index = Number.parseInt(fieldKey.split("-")[1])
+          const newEducation = [...education]
+          newEducation[index] = {
+            ...newEducation[index],
+            description: Array.isArray(data) ? data[0].improved_text : data.improved_text,
+          }
+          setEducation(newEducation)
+        }
+
+        toast({
+          title: "Text Improved",
+          description: "Your text has been enhanced with AI.",
+          className: "bg-[oklch(0.546_0.245_262.881)]/10 border-purple-500",
+        })
+      } else {
+        throw new Error("Invalid response format")
       }
-      
-      toast({
-        title: "Text Improved",
-        description: "Your text has been enhanced with AI.",
-        className: "bg-[oklch(0.546_0.245_262.881)]/10 border-purple-500",
-      })
     } catch (error) {
-      console.error('Error improving text:', error)
+      console.error("Error improving text:", error)
       toast({
         title: "Error",
         description: "Failed to improve text. Please try again.",
-        variant: "destructive"
+        variant: "destructive",
       })
     } finally {
-      setIsImprovingText(prev => ({ ...prev, [fieldKey]: false }))
+      setIsImprovingText((prev) => ({ ...prev, [fieldKey]: false }))
     }
   }
 
@@ -1509,7 +1622,7 @@ export default function ResumeBuilderPage() {
               <p className="text-muted-foreground">Create and customize your professional resume</p>
             </div>
           </div>
-          
+
           {/* AI Model Selector */}
           <div className="flex items-center gap-2 ml-auto mr-4">
             <span className="text-sm font-medium">AI Model:</span>
@@ -1519,10 +1632,18 @@ export default function ResumeBuilderPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="gemini-pro">Google Gemini</SelectItem>
-                <SelectItem disabled value="gpt-4">ChatGPT (GPT-4)</SelectItem>
-                <SelectItem disabled value="gpt-3.5">ChatGPT (GPT-3.5)</SelectItem>
-                <SelectItem disabled value="claude">Anthropic Claude</SelectItem>
-                <SelectItem disabled value="deepseek">DeepSeek</SelectItem>
+                <SelectItem disabled value="gpt-4">
+                  ChatGPT (GPT-4)
+                </SelectItem>
+                <SelectItem disabled value="gpt-3.5">
+                  ChatGPT (GPT-3.5)
+                </SelectItem>
+                <SelectItem disabled value="claude">
+                  Anthropic Claude
+                </SelectItem>
+                <SelectItem disabled value="deepseek">
+                  DeepSeek
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -1862,3 +1983,4 @@ export default function ResumeBuilderPage() {
     </div>
   )
 }
+
