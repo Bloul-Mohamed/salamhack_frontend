@@ -9,7 +9,7 @@ import Marquee3D from "@/components/marquee-3d"
 
 export default function HomePage() {
   return (
-    <div className="flex flex-col overflow-x-hidden w-screen items-center">
+    <div className="flex flex-col items-center">
       <HeroSection />
       <Marquee3D></Marquee3D>
       <FeatureSection />

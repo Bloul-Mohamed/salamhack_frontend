@@ -98,7 +98,7 @@ const Icons = {
 export function HeroSection() {
   return (
     <section className="w-full py-12 md:py-24 lg:py-32">
-      <div className="container overflow-y-hidden px-4 md:px-6 max-w-5xl">
+      <div className="container overflow-x-hidden px-4 md:px-6 max-w-5xl">
         <div className="absolute left-0">
           <OrbitingCirclesDemo></OrbitingCirclesDemo>
         </div>

@@ -36,13 +36,13 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
         <body className={cn("min-h-screen bg-background antialiased", inter.className)}>
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-            <div className="relative flex min-h-screen flex-col">
+          {/* <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange> */}
+            <div className="relative flex min-h-screen max-w-screen flex-col">
               <SiteHeader />
               <main className="flex-1">{children}</main>
               <Toaster />
             </div>
-          </ThemeProvider>
+          {/* </ThemeProvider> */}
         </body>
       </html>
     </ClerkProvider>
