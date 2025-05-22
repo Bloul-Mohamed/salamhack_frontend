@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
           Authorization: `Bearer ${process.env.CHARGILY_SECRET_KEY}`,
           "Content-Type": "application/json",
         },
-        body: `{"amount":${price?.split(" ")[0]},"currency":"dzd","success_url":"https://cv-genius-two.vercel.app/success"}`,
+        body: `{"amount":${price?.split(" ")[0]},"currency":"dzd","success_url":"https://cv-genius-m.vercel.app/success"}`,
       };
   
       const response = await fetch(
