@@ -6,7 +6,7 @@ import Image from "next/image";
 
 export function OrbitingCirclesDemo() {
   return (
-    <div className="flex h-[500px] w-full flex-col items-center justify-center overflow-hidden opacity-35">
+    <div className="flex h-[500px] w-screen !overflow-hidden flex-col items-center justify-center opacity-35">
       <OrbitingCircles iconSize={50} radius={500} speed={0.5}>
         <Icons.github />
         <Icons.instagram />
@@ -98,8 +98,8 @@ const Icons = {
 export function HeroSection() {
   return (
     <section className="w-full py-12 md:py-24 lg:py-32">
-      <div className="container px-4 md:px-6 max-w-5xl">
-        <div className="absolute mx-auto left-1/2">
+      <div className="container overflow-y-hidden px-4 md:px-6 max-w-5xl">
+        <div className="absolute left-0">
           <OrbitingCirclesDemo></OrbitingCirclesDemo>
         </div>
         <div className="relative z-10 grid gap-6 lg:grid-cols-2 lg:gap-12 xl:gap-16 items-center">

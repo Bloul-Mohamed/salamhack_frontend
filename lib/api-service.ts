@@ -93,6 +93,14 @@ export async function getPlans() {
   return fetchAPI("/pack/plans/")
 }
 
+export async function getClients() {
+  return fetchAPI("/users/clients/")
+}
+
+export async function getClient(id : string) {
+  return fetchAPI(`/users/clients/${id}`)
+}
+
 export async function createClient(clientData: {
   name: string
   email: string

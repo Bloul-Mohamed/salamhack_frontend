@@ -1,13 +1,17 @@
+"use client"
+
 import { Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { redirect } from "next/navigation"
 
 export default function PricingPage() {
+  
   const plans = [
     {
       name: "Free",
-      price: { monthly: "$0", annual: "$0" },
+      price: { monthly: "0 DA", annual: "0 DA" },
       description: "Basic resume building tools",
       features: ["1 resume", "3 templates", "Basic ATS check", "Export as PDF", "7-day history"],
       limitations: ["Limited AI suggestions", "No cover letter generation", "No job matching"],
@@ -16,7 +20,7 @@ export default function PricingPage() {
     },
     {
       name: "Pro",
-      price: { monthly: "$12", annual: "$8" },
+      price: { monthly: "3000 DA", annual: "2000 DA" },
       description: "Advanced features for job seekers",
       features: [
         "Unlimited resumes",
@@ -33,7 +37,7 @@ export default function PricingPage() {
     },
     {
       name: "Premium",
-      price: { monthly: "$29", annual: "$19" },
+      price: { monthly: "8000 DA", annual: "6000 DA" },
       description: "Complete career solution",
       features: [
         "Everything in Pro",
@@ -50,6 +54,16 @@ export default function PricingPage() {
     },
   ]
 
+
+  const handleChargily = async (name : string , price : string) => {
+    if(name == "Free") {
+      redirect("/resume/builder")
+    }else {
+      const res = await fetch(`/api/chargily/?price=${price}`);
+      const data = await res.json();
+      window.location = data.data?.checkout_url;
+    }
+  }
   return (
     <div className="container py-6 space-y-12 max-w-6xl">
       <div className="text-center space-y-4">
@@ -104,7 +118,9 @@ export default function PricingPage() {
                   </ul>
                 </CardContent>
                 <CardFooter>
-                  <Button className="w-full" size="sm" variant={plan.popular ? "default" : "outline"}>
+                  <Button onClick={() => {
+                    handleChargily(plan.name , plan.price.monthly);
+                  }} className="w-full" size="sm" variant={plan.popular ? "default" : "outline"}>
                     {plan.cta}
                   </Button>
                 </CardFooter>
@@ -150,7 +166,9 @@ export default function PricingPage() {
                   </ul>
                 </CardContent>
                 <CardFooter>
-                  <Button className="w-full" size="sm" variant={plan.popular ? "default" : "outline"}>
+                  <Button onClick={() => {
+                    handleChargily(plan.name , plan.price.annual);
+                  }} className="w-full" size="sm" variant={plan.popular ? "default" : "outline"}>
                     {plan.cta}
                   </Button>
                 </CardFooter>
@@ -160,7 +178,7 @@ export default function PricingPage() {
         </TabsContent>
       </Tabs>
 
-      <div className="bg-muted rounded-lg p-8">
+      {/* <div className="bg-muted rounded-lg p-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="space-y-2">
             <h3 className="text-lg font-medium">Enterprise Solutions</h3>
@@ -190,7 +208,7 @@ export default function PricingPage() {
             </Button>
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   )
 }

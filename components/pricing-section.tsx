@@ -1,12 +1,13 @@
 import { Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import Link from "next/link"
 
 export function PricingSection() {
   const plans = [
     {
       name: "Free",
-      price: "$0",
+      price: "0 DA",
       description: "Basic resume building tools",
       features: ["1 resume", "3 templates", "Basic ATS check", "Export as PDF", "7-day history"],
       cta: "Get Started",
@@ -14,7 +15,7 @@ export function PricingSection() {
     },
     {
       name: "Pro",
-      price: "$12",
+      price: "3000 DA",
       period: "/month",
       description: "Advanced features for job seekers",
       features: [
@@ -31,7 +32,7 @@ export function PricingSection() {
     },
     {
       name: "Premium",
-      price: "$29",
+      price: "8000 DA",
       period: "/month",
       description: "Complete career solution",
       features: [
@@ -87,9 +88,11 @@ export function PricingSection() {
                 </ul>
               </CardContent>
               <CardFooter>
+                <Link href={'/pricing'}>
                 <Button className="w-full" size="sm" variant={plan.popular ? "default" : "outline"}>
                   {plan.cta}
                 </Button>
+                </Link>
               </CardFooter>
             </Card>
           ))}

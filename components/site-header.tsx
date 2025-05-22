@@ -6,6 +6,7 @@ import { Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ModeToggle } from "@/components/mode-toggle"
 import Image from "next/image"
+import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs"
 
 export function SiteHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -23,12 +24,14 @@ export function SiteHeader() {
 
         <div className="hidden md:flex md:flex-1 md:items-center md:justify-between">
           <nav className="flex items-center space-x-6 text-sm font-medium">
-            <Link href="/resume/builder" className="transition-colors hover:text-foreground/80">
-              Resume Builder
-            </Link>
-            <Link href="/resume/analyze" className="transition-colors hover:text-foreground/80">
-              Resume Analysis
-            </Link>
+            <SignedIn>
+              <Link href="/resume/builder" className="transition-colors hover:text-foreground/80">
+                Resume Builder
+              </Link>
+              <Link href="/resume/analyze" className="transition-colors hover:text-foreground/80">
+                Resume Analysis
+              </Link>
+            </SignedIn>
             <Link href="/features" className="transition-colors hover:text-foreground/80">
               Features
             </Link>
@@ -38,12 +41,17 @@ export function SiteHeader() {
           </nav>
           <div className="flex items-center space-x-3">
             <ModeToggle />
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/login">Sign In</Link>
-            </Button>
-            <Button size="sm" asChild>
-              <Link href="/signup">Sign Up</Link>
-            </Button>
+            <SignedOut>
+              <Button variant="ghost" size="sm" asChild>
+                <Link href="/sign-in">Sign In</Link>
+              </Button>
+              <Button size="sm" asChild>
+                <Link href="/sign-up">Sign Up</Link>
+              </Button>
+            </SignedOut>
+            <SignedIn>
+              <UserButton />
+            </SignedIn>
           </div>
         </div>
 
@@ -64,12 +72,14 @@ export function SiteHeader() {
               <span className="sr-only">Close menu</span>
             </Button>
             <nav className="flex flex-col space-y-6 text-lg font-medium">
-              <Link href="/resume/builder" className="hover:text-foreground/80" onClick={() => setIsMenuOpen(false)}>
-                Resume Builder
-              </Link>
-              <Link href="/resume/analyze" className="hover:text-foreground/80" onClick={() => setIsMenuOpen(false)}>
-                Resume Analysis
-              </Link>
+              <SignedIn>
+                <Link href="/resume/builder" className="hover:text-foreground/80" onClick={() => setIsMenuOpen(false)}>
+                  Resume Builder
+                </Link>
+                <Link href="/resume/analyze" className="hover:text-foreground/80" onClick={() => setIsMenuOpen(false)}>
+                  Resume Analysis
+                </Link>
+              </SignedIn>
               <Link href="/features" className="hover:text-foreground/80" onClick={() => setIsMenuOpen(false)}>
                 Features
               </Link>

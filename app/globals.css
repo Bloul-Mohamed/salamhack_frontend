@@ -10,6 +10,8 @@
     --card: 0 0% 100%;
     --card-foreground: 222 47% 11%;
 
+    --color: 0 0 0;
+
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
 
@@ -47,6 +49,8 @@
   .dark {
     --background: 222 47% 11%;
     --foreground: 210 40% 98%;
+
+    --color: #ddd;
 
     --card: 222 47% 11%;
     --card-foreground: 210 40% 98%;
@@ -140,4 +144,35 @@
 
 .animate-marquee-vertical {
   animation: marquee-vertical var(--duration, 40s) linear infinite;
+}
+
+.cl-internal-1dauvpw {
+  display: none;
+}
+
+.cl-internal-7hb1uf {
+  box-shadow: none;
+  border-radius: none
+}
+.cl-card {
+  background: var(--background);
+}
+.cl-footer {
+  background: var(--background);
+}
+.cl-headerTitle {
+  color: var(--color);
+}
+
+.cl-socialButtonsBlockButton {
+  background-color: var(--color);
+}
+
+.cl-formFieldLabel {
+  color: var(--color);
+}
+
+.cl-formButtonPrimary {
+  color: black;
+  background-color: var(--color);
 }

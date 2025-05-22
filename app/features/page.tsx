@@ -125,7 +125,7 @@ export default function FeaturesPage() {
         ))}
       </div>
 
-      <div className="bg-muted rounded-lg p-8 text-center">
+      {/* <div className="bg-muted rounded-lg p-8 text-center">
         <h2 className="text-2xl font-bold mb-4">Ready to build your perfect resume?</h2>
         <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
           Join thousands of job seekers who have used our platform to land their dream jobs.
@@ -144,7 +144,7 @@ export default function FeaturesPage() {
             View Templates
           </a>
         </div>
-      </div>
+      </div> */}
     </div>
   )
 }
